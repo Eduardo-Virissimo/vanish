@@ -1,0 +1,22 @@
+/*
+ * flow-root impede que a margem negativa do canvas "vaze" para esta caixa
+ * (colapso de margem): sem isso a caixa inteira subia por cima dos botões do topo
+ * e bloqueava os cliques neles. pointer-events: none garante que a barra nunca
+ * intercepte cliques.
+ */
+.bar-wrap {
+  display: flow-root;
+  position: relative;
+  margin-top: 22px;
+  pointer-events: none;
+}
+
+/* O canvas sobe por cima do status para as faíscas terem onde subir */
+#bar {
+  display: block;
+  width: 100%;
+  margin-top: calc(-1 * var(--bar-top-room));
+  pointer-events: none;
+  position: relative;
+  z-index: 1;
+}

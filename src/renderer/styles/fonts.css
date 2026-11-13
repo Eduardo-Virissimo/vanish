@@ -1,0 +1,11 @@
+/*
+ * Sora: fonte geométrica de cantos suaves, usada só no nome do app (tela de abertura e menu).
+ * Combina com os quadrados arredondados do símbolo. Fonte variável (pesos 100 a 800).
+ * Licença SIL Open Font License 1.1 (src/renderer/fonts/OFL-Sora.txt). Vai junto com o app.
+ */
+@font-face {
+  font-family: "Sora";
+  src: url("../fonts/Sora.ttf") format("truetype");
+  font-weight: 100 800;
+  font-display: block;
+}

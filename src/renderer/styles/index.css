@@ -1,0 +1,12 @@
+/* Junta tudo num app.css no build (scripts/build.mjs) */
+@import './fonts.css';
+@import './tokens.css';
+@import './base.css';
+@import './header.css';
+@import './bar.css';
+@import './categories.css';
+@import './footer.css';
+@import './panel.css';
+@import './folders.css';
+@import './confirm.css';
+@import './splash.css';

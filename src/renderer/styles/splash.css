@@ -1,0 +1,73 @@
+/*
+ * Tela de abertura: tudo preto, o símbolo (pixels se desfazendo) e o nome "vanish" em Sora. A marca surge nítida a partir de um brilho; o nome vem logo depois. No fim tudo some
+ * revelando o app, que já está analisando por trás. Controlado por views/splash.ts.
+ */
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 18px;
+  background: #000;
+  cursor: default;
+  transition: opacity 480ms ease;
+}
+
+/* halo bem suave atrás do nome (azul/ciano, as cores do ícone) */
+.splash-glow {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 560px;
+  height: 320px;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(61, 139, 255, 0.16), rgba(34, 211, 238, 0.05) 60%, transparent);
+  opacity: 0;
+  animation: splash-glow 1400ms ease-out 150ms forwards;
+}
+
+.splash-name {
+  position: relative;
+  margin: 0;
+  font-family: var(--brand);
+  font-size: 46px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-transform: lowercase;
+  color: var(--text);
+  /* leve brilho azul, como o do símbolo */
+  text-shadow: 0 0 22px rgba(90, 170, 255, 0.35);
+  opacity: 0;
+  animation: name-in 700ms cubic-bezier(0.2, 0.8, 0.2, 1) 450ms forwards;
+}
+
+.splash-mark {
+  position: relative;
+  opacity: 0;
+  animation: mark-in 800ms cubic-bezier(0.2, 0.8, 0.2, 1) 100ms forwards;
+}
+
+.splash.leaving { opacity: 0; pointer-events: none; }
+
+@keyframes mark-in {
+  from { opacity: 0; transform: scale(0.9); filter: blur(10px) brightness(1.8); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+
+@keyframes name-in {
+  from { opacity: 0; transform: translateY(8px); letter-spacing: 0.2em; }
+  to { opacity: 1; transform: none; letter-spacing: -0.01em; }
+}
+
+@keyframes splash-glow {
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .splash-mark,
+  .splash-name,
+  .splash-glow { animation: none; opacity: 1; }
+}

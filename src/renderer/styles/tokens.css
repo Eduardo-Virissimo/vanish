@@ -1,0 +1,25 @@
+:root {
+  --bg: #1B1C1F;
+  --bg-foot: #17181A;
+  --line: rgba(255, 255, 255, 0.07);
+  --text: #F3F3F5;
+  --soft: #C9CBD1;
+  --muted: #8E9099;
+  --faint: #5C5E66;
+  --btn: #2A2B30;
+  --btn-hover: #34353B;
+  --danger: #E5484D;
+  --danger-hover: #F05257;
+
+  --sans: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  --display: "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+  --mono: "Cascadia Mono", "Cascadia Code", Consolas, monospace;
+  /* fonte da marca: só para o nome do app */
+  --brand: "Sora", var(--display);
+
+  /* espaço acima da barra para as partículas (igual a TOP_ROOM em bar/paint.ts) */
+  --bar-top-room: 96px;
+  /* largura da coluna de pastas */
+  --panel-w: 420px;
+  color-scheme: dark;
+}

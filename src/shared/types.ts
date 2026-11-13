@@ -1,0 +1,64 @@
+// Tipos de dados usados tanto no processo principal quanto na tela.
+
+/** id de uma categoria (o nome do arquivo em src/cleaner/categories/, ex.: "browsers") */
+export type CategoryId = string;
+
+/** O que acontece quando a categoria é limpa (mostrado no diálogo de confirmação) */
+export interface CategoryWarning {
+  /** danger = perda que não volta (exige "Entendi"); caution = efeito colateral */
+  level: 'danger' | 'caution';
+  text: string;
+}
+
+/** O que a tela precisa saber sobre uma categoria (sem os caminhos). */
+export interface CategoryInfo {
+  id: CategoryId;
+  name: string;
+  color: string;
+  /** desenho do ícone: conteúdo de um <svg viewBox="0 0 24 24">, pintado com currentColor */
+  icon: string;
+  hint: string;
+  /** false = começa desmarcada (o usuário precisa escolher; ex.: Lixeira) */
+  defaultSelected: boolean;
+  warning?: CategoryWarning;
+}
+
+export interface DiskInfo {
+  drive: string;
+  total: number;
+  free: number;
+}
+
+/** Uma pasta real encontrada no PC, dentro de uma categoria */
+export interface FolderInfo {
+  path: string;
+  bytes: number;
+  files: number;
+  denied: boolean;
+  /** regra extra, ex.: "Só arquivos com mais de 24 horas" */
+  note?: string;
+}
+
+export interface ScanResult {
+  bytes: number;
+  files: number;
+  /** true quando nada pôde ser lido por falta de permissão (precisa de admin) */
+  denied: boolean;
+  /** motivo de a categoria estar bloqueada agora (ex.: atualização esperando reiniciar) */
+  blocked?: string;
+  folders: FolderInfo[];
+}
+
+export interface CleanResult {
+  freed: number;
+  removed: number;
+  /** arquivos que não puderam ser apagados (em uso ou sem permissão) */
+  skipped: number;
+  /** o que sobrou em cada pasta depois da limpeza */
+  folders?: FolderInfo[];
+}
+
+export interface InitData {
+  home: string;
+  categories: CategoryInfo[];
+}

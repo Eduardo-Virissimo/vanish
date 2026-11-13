@@ -1,0 +1,5 @@
+node_modules/
+dist/
+.tmp/
+# design de terceiros usado só como inspiração: fica no PC, nunca no repositório
+docs/reference/mockup-original.png

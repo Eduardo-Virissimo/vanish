@@ -1,0 +1,23 @@
+{
+  "name": "vanish",
+  "productName": "Vanish",
+  "version": "0.4.0",
+  "description": "Limpa arquivos temporÃ¡rios e caches do Windows",
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "node scripts/test.mjs",
+    "logo": "node scripts/make-logo.mjs",
+    "icon": "electron scripts/render-icon.cjs",
+    "start": "npm run build && electron ."
+  },
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "electron": "^45.3.1",
+    "esbuild": "^0.28.2",
+    "typescript": "^7.0.2"
+  }
+}

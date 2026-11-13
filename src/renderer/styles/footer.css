@@ -1,0 +1,46 @@
+/* sombra suave para cima: o rodapé parece flutuar sobre o conteúdo (fica abaixo do menu ☰) */
+.foot {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 18px 32px;
+  border-top: 1px solid var(--line);
+  background: var(--bg-foot);
+  box-shadow: 0 -16px 32px -12px rgba(0, 0, 0, 0.6);
+}
+
+.foot-msg {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  max-width: 64ch;
+  font-size: 15px;
+  color: var(--soft);
+}
+.foot-icon { width: 22px; height: 22px; flex: none; }
+
+.actions { display: flex; gap: 10px; flex: none; }
+
+.btn {
+  padding: 11px 20px;
+  border: 0;
+  border-radius: 11px;
+  background: var(--btn);
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 120ms, color 120ms;
+}
+.btn:hover:not(:disabled) { background: var(--btn-hover); }
+.btn:disabled { color: var(--faint); cursor: default; }
+
+/* Botão de confirmação ("Apagar 9,4 GB") */
+.btn.danger { background: var(--danger); color: #fff; }
+.btn.danger:hover:not(:disabled) { background: var(--danger-hover); }

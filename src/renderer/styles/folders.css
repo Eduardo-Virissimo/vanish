@@ -1,0 +1,100 @@
+/*
+ * Lista de pastas dentro do menu (views/panel.ts): cada categoria com as suas pastas reais.
+ */
+
+/* ---------- Categoria ---------- */
+
+.dr-cat { padding: 14px 12px 4px; }
+.dr-cat + .dr-cat { border-top: 1px solid var(--line); }
+
+.dr-cat-head {
+  display: grid;
+  grid-template-columns: 10px 1fr auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.dr-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  background: var(--c);
+  box-shadow: 0 0 10px var(--c);
+}
+
+.dr-cat-name { margin: 0; font-size: 15px; font-weight: 600; }
+.dr-cat-size { font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.dr-cat-state {
+  margin: 6px 0 4px 20px;
+  font-size: 13px;
+  color: var(--faint);
+}
+
+.dr-cat.is-off .dr-dot { opacity: 0.35; box-shadow: none; }
+.dr-cat.is-off .dr-cat-name { color: var(--muted); }
+
+/* ---------- Pastas ---------- */
+
+.dr-folders {
+  list-style: none;
+  margin: 8px 0 6px 4px;
+  padding: 0 0 0 10px;
+  border-left: 1px solid color-mix(in srgb, var(--c) 35%, transparent);
+}
+
+.dr-folder {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 14px;
+  column-gap: 10px;
+  row-gap: 3px;
+  align-items: baseline;
+  padding: 7px 8px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 120ms;
+}
+.dr-folder:hover { background: rgba(255, 255, 255, 0.05); }
+
+.dr-path {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.45;
+  color: var(--soft);
+  overflow-wrap: anywhere;
+}
+
+.dr-size {
+  font-size: 12.5px;
+  color: var(--muted);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.dr-open { align-self: center; color: var(--faint); opacity: 0; transition: opacity 120ms; }
+.dr-open svg {
+  display: block;
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.dr-folder:hover .dr-open,
+.dr-folder:focus-visible .dr-open { opacity: 1; color: var(--text); }
+
+.dr-note {
+  grid-column: 1 / -1;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.dr-folder.is-empty .dr-path,
+.dr-folder.is-empty .dr-size { color: var(--faint); }

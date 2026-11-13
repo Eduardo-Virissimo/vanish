@@ -1,0 +1,83 @@
+.cats {
+  list-style: none;
+  margin: 26px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: 40px;
+  row-gap: 2px;
+}
+
+/* --c = cor da categoria (definida pelo JS) */
+.cat {
+  width: calc(100% + 20px);
+  margin: 0 -10px;
+  display: grid;
+  grid-template-columns: 16px 22px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 10px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 120ms;
+}
+.cat:hover:not(:disabled) { background: rgba(255, 255, 255, 0.045); }
+.cat:disabled { cursor: default; }
+
+.check {
+  width: 16px;
+  height: 16px;
+  border-radius: 5px;
+  border: 1.5px solid rgba(255, 255, 255, 0.22);
+  display: grid;
+  place-items: center;
+  transition: background-color 120ms, border-color 120ms;
+}
+.check svg {
+  width: 11px;
+  height: 11px;
+  fill: none;
+  stroke: var(--bg);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0;
+}
+
+.cat-icon { width: 22px; height: 22px; color: var(--c); transition: opacity 120ms; }
+
+.cat-name {
+  font-size: 16.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 120ms;
+}
+
+.cat-size {
+  font-size: 15.5px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.cat-size.loading { color: var(--faint); }
+
+/* Marcada */
+.cat[aria-checked="true"] .check { background: var(--c); border-color: var(--c); }
+.cat[aria-checked="true"] .check svg { opacity: 1; }
+
+/* Desmarcada */
+.cat[aria-checked="false"] .cat-name { color: var(--muted); }
+.cat[aria-checked="false"] .cat-icon { opacity: 0.45; }
+
+/* Vazia ou sem permissão */
+.cat.is-empty .cat-icon,
+.cat.is-denied .cat-icon { opacity: 0.3; }
+.cat.is-empty .cat-name,
+.cat.is-denied .cat-name { color: var(--faint); }
+.cat.is-empty .check,
+.cat.is-denied .check { opacity: 0.35; }
+.cat.is-denied .cat-size { font-size: 13.5px; color: var(--faint); }

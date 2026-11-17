@@ -9,9 +9,10 @@ export default defineCategory({
   color: '#FF4FA3',
   icon: '<rect x="2.5" y="2.5" width="8.5" height="8.5" rx="2.4" fill="currentColor"/><rect x="13" y="2.5" width="8.5" height="8.5" rx="2.4" fill="currentColor" opacity=".7"/><rect x="2.5" y="13" width="8.5" height="8.5" rx="2.4" fill="currentColor" opacity=".7"/><rect x="13" y="13" width="8.5" height="8.5" rx="2.4" fill="currentColor"/>',
   hint: 'Cache do Discord, VS Code, Slack, Teams, Spotify, Notion, Obsidian e Postman',
+  closeFirst: 'Discord, Slack, Spotify e afins',
   warning: {
     level: 'caution',
-    text: 'Feche esses apps antes. Músicas baixadas no Spotify e páginas offline do Notion não são apagadas.',
+    text: 'Músicas baixadas no Spotify e páginas offline do Notion continuam.',
   },
   targets: [
     ...electronCaches(join(ROAMING, 'discord')),

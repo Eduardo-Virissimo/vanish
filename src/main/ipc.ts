@@ -7,6 +7,9 @@ import { cleanCategory, scanCategory } from '../cleaner/engine';
 import type { EventChannel, EventMap, InvokeChannel, InvokeMap } from '../shared/ipc';
 import type { CleanResult, ScanResult } from '../shared/types';
 import { BG } from './window';
+import { isAdmin, relaunchAsAdmin } from './admin';
+import { taskbar } from './taskbar';
+import { installNow } from './updater';
 import { exclusive, latest, throttle } from './timing';
 
 type Handler<K extends InvokeChannel> = (
@@ -27,11 +30,12 @@ const EMPTY_CLEAN: CleanResult = { freed: 0, removed: 0, skipped: 0 };
 const knownFolders = new Set<string>();
 
 export function registerIpc(): void {
-  handle('app:init', () => ({
+  handle('app:init', async () => ({
     home: homedir(),
+    isAdmin: await isAdmin(),
     // só o que a tela precisa: os caminhos ficam no processo principal
-    categories: categories.map(({ id, name, color, icon, hint, optIn, warning }) => ({
-      id, name, color, icon, hint, warning, defaultSelected: !optIn,
+    categories: categories.map(({ id, name, color, icon, hint, optIn, warning, closeFirst }) => ({
+      id, name, color, icon, hint, warning, closeFirst, defaultSelected: !optIn,
     })),
   }));
 
@@ -43,6 +47,8 @@ export function registerIpc(): void {
 
   handle('scan', (event) => exclusive(async () => {
     const emit = emitter(event.sender);
+    const progress = taskbar(event.sender);
+    progress.busy();
     const onPath = latest((p: string) => emit('progress:path', p), 60);
     const results = await Promise.all(categories.map(async (category) => {
       const result = { id: category.id, ...(await scanCategory(category, onPath).catch(() => EMPTY_SCAN)) };
@@ -51,6 +57,7 @@ export function registerIpc(): void {
     }));
     knownFolders.clear();
     for (const r of results) for (const f of r.folders) knownFolders.add(f.path.toLowerCase());
+    progress.done();
     return results;
   }));
 
@@ -61,6 +68,10 @@ export function registerIpc(): void {
     const error = await shell.openPath(path);
     if (error) throw new Error(error);
   });
+
+  // caminho fixo: sempre o próprio Vanish, nunca algo vindo da tela
+  handle('app:relaunch-admin', () => relaunchAsAdmin());
+  handle('update:install', () => installNow());
 
   handle('window:splash-done', (event) => {
     const win = BrowserWindow.fromWebContents(event.sender);
@@ -75,8 +86,11 @@ export function registerIpc(): void {
     // Só aceita ids que existem na lista fechada de categorias
     const wanted = new Set(Array.isArray(ids) ? ids : []);
     const total = { ...EMPTY_CLEAN };
+    const chosen = categories.filter((c) => wanted.has(c.id));
+    const progress = taskbar(event.sender);
 
-    for (const category of categories.filter((c) => wanted.has(c.id))) {
+    for (const [index, category] of chosen.entries()) {
+      progress.set(index / chosen.length);
       emit('clean:start', { id: category.id });
       const onFreed = throttle((freed: number) => emit('clean:progress', { id: category.id, freed }), 80);
       const result = await cleanCategory(category, { onPath, onFreed }).catch(() => EMPTY_CLEAN);
@@ -86,6 +100,7 @@ export function registerIpc(): void {
       for (const f of result.folders ?? []) knownFolders.add(f.path.toLowerCase());
       emit('clean:category', { id: category.id, ...result });
     }
+    progress.done();
     return total;
   }));
 }

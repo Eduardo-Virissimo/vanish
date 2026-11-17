@@ -7,19 +7,30 @@
 .dr-cat { padding: 14px 12px 4px; }
 .dr-cat + .dr-cat { border-top: 1px solid var(--line); }
 
+/* cabeçalho da categoria gruda logo abaixo da marca enquanto as pastas dela rolam */
 .dr-cat-head {
+  position: sticky;
+  top: 40px;
+  z-index: 1;
+  margin: -14px -12px 0;
+  padding: 14px 12px 8px;
+  background: var(--surface-panel);
   display: grid;
   grid-template-columns: 10px 1fr auto;
   align-items: center;
   gap: 10px;
 }
 
+/* LED como os pixels da barra: reflexo em cima, sombra embaixo, halo curto */
 .dr-dot {
   width: 10px;
   height: 10px;
-  border-radius: 3px;
+  border-radius: 2px;
   background: var(--c);
-  box-shadow: 0 0 10px var(--c);
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -1.5px 0 rgba(0, 0, 0, 0.25),
+    0 0 7px color-mix(in srgb, var(--c) 40%, transparent);
 }
 
 .dr-cat-name { margin: 0; font-size: 15px; font-weight: 600; }
@@ -28,7 +39,7 @@
 .dr-cat-state {
   margin: 6px 0 4px 20px;
   font-size: 13px;
-  color: var(--faint);
+  color: var(--dim);
 }
 
 .dr-cat.is-off .dr-dot { opacity: 0.35; box-shadow: none; }
@@ -65,9 +76,11 @@
   font-size: 12px;
   font-weight: 400;
   line-height: 1.45;
-  color: var(--soft);
-  overflow-wrap: anywhere;
+  color: var(--muted); /* o caminho até a pasta fica apagado; o nome dela (.dr-leaf) se destaca */
+  overflow-wrap: break-word;
 }
+.dr-leaf { color: var(--text); }
+.dr-folder.is-empty .dr-leaf { color: var(--dim); }
 
 .dr-size {
   font-size: 12.5px;
@@ -97,4 +110,33 @@
 }
 
 .dr-folder.is-empty .dr-path,
-.dr-folder.is-empty .dr-size { color: var(--faint); }
+.dr-folder.is-empty .dr-size { color: var(--dim); }
+
+/* Categoria desmarcada: as pastas ficam recolhidas atrás de "Ver N pastas" */
+.dr-more { margin: 2px 0 6px 20px; }
+.dr-more > .dr-folders { margin-left: -16px; }
+.dr-more-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px 3px 6px;
+  margin-left: -6px;
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--muted);
+  cursor: pointer;
+  list-style: none;
+  transition: color 120ms, background-color 120ms;
+}
+.dr-more-toggle::-webkit-details-marker { display: none; }
+.dr-more-toggle::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform 160ms;
+}
+.dr-more[open] > .dr-more-toggle::before { transform: rotate(45deg) translate(-2px, -1px); }
+.dr-more-toggle:hover { color: var(--text); background: rgba(255, 255, 255, 0.05); }

@@ -65,7 +65,8 @@ Não precisa mexer em mais nada: a tela recebe nome, cor, ícone e aviso pelo IP
 | Situação | O que usar |
 |---|---|
 | Sem efeito colateral | sem `warning` |
-| Efeito colateral (algo fica mais lento, precisa fechar um app, baixa de novo) | `warning: { level: 'caution', text }` |
+| Efeito colateral (algo fica mais lento, baixa de novo) | `warning: { level: 'caution', text }`: diga o que muda e o que **continua** ("Senhas e logins continuam") |
+| Precisa fechar um programa antes para limpar tudo | `closeFirst: 'Steam e Epic'` (vira uma etiqueta "feche antes" no diálogo); não repita isso no `warning` |
 | Perda que não volta (arquivos do usuário) | `level: 'danger'` **e** `optIn: true` (o teste exige) |
 | Seguro só em certas condições | `optIn: true` e, se der para checar, um `guard` em `src/cleaner/guards.ts` |
 | Só é seguro com o comando do próprio programa (ex.: `uv cache clean`) | **não** apague por caminho; ainda não suportado (ver [ROADMAP](ROADMAP.md)) |

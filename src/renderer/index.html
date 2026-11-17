@@ -7,29 +7,43 @@
   <link rel="stylesheet" href="app.css">
 </head>
 <body>
+  <!-- filtros de pixelar (bloco de 8, 5 e 3 px): o número grande passa por eles ao mudar (header.css) -->
+  <svg class="defs" aria-hidden="true" width="0" height="0">
+    <filter id="px8" x="0" y="0"><feFlood x="4" y="4" height="1" width="1"/><feComposite width="8" height="8"/><feTile result="a"/><feComposite in="SourceGraphic" in2="a" operator="in"/><feMorphology operator="dilate" radius="4"/></filter>
+    <filter id="px5" x="0" y="0"><feFlood x="2" y="2" height="1" width="1"/><feComposite width="5" height="5"/><feTile result="a"/><feComposite in="SourceGraphic" in2="a" operator="in"/><feMorphology operator="dilate" radius="2.5"/></filter>
+    <filter id="px3" x="0" y="0"><feFlood x="1" y="1" height="1" width="1"/><feComposite width="3" height="3"/><feTile result="a"/><feComposite in="SourceGraphic" in2="a" operator="in"/><feMorphology operator="dilate" radius="1.5"/></filter>
+  </svg>
   <div class="app" id="app">
     <div class="titlebar">
       <button class="menu-btn" id="panel-toggle" type="button"
               aria-label="Abrir menu" title="Menu"
               aria-expanded="false" aria-controls="panel">
         <!-- três linhas que viram um X quando o menu abre (panel.css) -->
-        <span class="menu-icon" aria-hidden="true"><span></span><span></span><span></span></span>
+        <span class="menu-icon" id="menu-icon" aria-hidden="true"></span>
       </button>
     </div>
 
     <main class="main" id="main">
       <header class="top">
-        <h1 class="usage">
-          <span class="used" id="used">&nbsp;</span>
-          <span class="of" id="of"></span>
+        <h1 class="hero">
+          <span class="hero-value" id="hero-value">&nbsp;</span>
+          <span class="hero-label" id="hero-label"></span>
         </h1>
         <div class="top-actions">
-          <button class="ghost-btn" id="rescan" type="button">
+          <!-- versão nova já baixada do GitHub: reinicia instalando (views/update.ts) -->
+          <button class="ghost-btn update-btn" id="update" type="button" hidden>
+            <span class="update-led" aria-hidden="true"></span>
+            <span id="update-label"></span>
+          </button>
+          <button class="ghost-btn" id="rescan" type="button" title="Analisar de novo (Ctrl+R)">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.3-4.9L4 8m0-5v5h5M4 13a8 8 0 0 0 14.3 4.9L20 16m0 5v-5h-5"/></svg>
+            <!-- analisando: o ícone vira uma grade 3×3 de pixels acendendo em espiral (header.css) -->
+            <span class="px-spin" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
             Analisar de novo
           </button>
         </div>
-        <p class="status" id="status" aria-live="polite">
+        <!-- sem aria-live: o caminho muda dezenas de vezes por segundo; quem anuncia é o rodapé (#msg) -->
+        <p class="status" id="status">
           <span class="status-verb" id="status-verb"></span>
           <span class="status-path" id="status-path"></span>
         </p>
@@ -40,31 +54,47 @@
       </div>
 
       <ul class="cats" id="cats" aria-label="Categorias para limpar"></ul>
+
+      <!-- alguma categoria precisa de administrador: explica e oferece reabrir elevado -->
+      <p class="admin-hint" id="admin-hint" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v5.5c0 4.2 2.9 8.1 7 9.5 4.1-1.4 7-5.3 7-9.5V6z"/></svg>
+        <span id="admin-hint-text"></span>
+        <button class="link-btn" id="admin-relaunch" type="button">Abrir como administrador</button>
+      </p>
     </main>
 
     <footer class="foot">
       <p class="foot-msg">
-        <svg class="foot-icon" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M12 2.5 2.5 7.6 12 12.7l9.5-5.1z" fill="#FFB547"/>
-          <path d="m2.5 12 9.5 5.1 9.5-5.1" fill="none" stroke="#FFB547" stroke-width="2" stroke-linejoin="round" opacity=".75"/>
-          <path d="m2.5 16.4 9.5 5.1 9.5-5.1" fill="none" stroke="#FFB547" stroke-width="2" stroke-linejoin="round" opacity=".45"/>
-        </svg>
-        <span id="msg"></span>
+        <!-- o símbolo do Vanish (pixels se desfazendo) no lugar de um ícone genérico -->
+        <img class="foot-icon" src="mark.svg" alt="" width="26" height="26">
+        <span id="msg" aria-live="polite"></span>
       </p>
       <div class="actions">
-        <button class="btn" id="clean" type="button" disabled>Limpar selecionados</button>
+        <button class="btn btn-clean" id="clean" type="button" title="Ctrl+Enter" disabled>
+          <span id="clean-label">Limpar selecionados</span>
+        </button>
       </div>
     </footer>
 
     <!-- Menu (☰): desliza da esquerda por cima do conteúdo. Logo + nome no topo, pastas embaixo -->
     <div class="scrim" id="scrim"></div>
     <aside class="panel" id="panel" tabindex="-1" aria-label="Menu" inert>
+      <canvas class="panel-edge" id="panel-edge" aria-hidden="true"></canvas>
       <div class="panel-inner" id="panel-scroll">
         <!-- na mesma linha do ☰, que vem deslizando e vira o X de fechar no canto direito -->
         <header class="panel-brand">
           <img class="panel-mark" src="mark.svg" alt="" width="30" height="30">
           <p class="panel-app-name">Vanish</p>
         </header>
+
+        <!-- histórico: total liberado e as últimas 8 semanas em pixels (views/history.ts) -->
+        <section class="history" aria-labelledby="history-title">
+          <h2 class="history-title" id="history-title">Liberado com o Vanish</h2>
+          <p class="history-total"><span id="history-total">—</span></p>
+          <p class="history-sub" id="history-sub"></p>
+          <div class="history-chart" id="history-chart" aria-hidden="true"></div>
+          <div class="history-axis" aria-hidden="true"><span>8 semanas atrás</span><span>esta semana</span></div>
+        </section>
 
         <section class="panel-section" aria-labelledby="panel-title">
           <h2 class="panel-title" id="panel-title">Pastas que serão limpas</h2>
@@ -79,7 +109,11 @@
     <div class="modal-scrim" id="confirm-scrim" hidden>
       <div class="modal" role="alertdialog" aria-modal="true" aria-labelledby="confirm-title" aria-describedby="confirm-desc">
         <h2 class="modal-title" id="confirm-title"></h2>
-        <p class="modal-desc" id="confirm-desc">Confira o que vai acontecer. Isso não pode ser desfeito.</p>
+        <p class="modal-desc" id="confirm-desc"></p>
+        <div class="confirm-close" id="confirm-close" hidden>
+          <p class="confirm-close-title">Para liberar tudo, feche antes:</p>
+          <ul class="confirm-close-list" id="confirm-close-list"></ul>
+        </div>
         <ul class="confirm-list" id="confirm-list"></ul>
         <label class="confirm-ack" id="confirm-ack-row" hidden>
           <input type="checkbox" id="confirm-ack">

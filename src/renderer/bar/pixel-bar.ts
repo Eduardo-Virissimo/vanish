@@ -8,15 +8,19 @@
 //                pixel a pixel, de baixo para cima, em cascata (reveal)
 // Na limpeza, a faísca "come" o bloco da direita para a esquerda.
 import type { CategoryId } from '../../shared/types';
-import { APPEAR_SEG_STAGGER, APPEAR_SEG_TOTAL } from './cells';
+import { APPEAR_SEG_STAGGER, APPEAR_SEG_TOTAL } from './appear';
+import { rippleDuration } from './effects';
 import { BAR_H, PITCH, TOP_ROOM, type Pass, type Segment } from './geometry';
 import { layoutSegments, stepSegments, type BarItem } from './layout';
-import { applyBloom, drawSegment, drawSweep, drawTrack } from './paint';
+import { applyBloom, drawRestingPixel, drawSegment, drawSweep, drawTrack } from './paint';
 import { drawParticles, spawnParticles, stepParticles, type Particle } from './particles';
 
 export type { BarItem } from './layout';
 
-const IDLE_FPS = 30; // parado, o pulso dos pixels não precisa de 60 fps
+// Parado, só o pulso lento dos pixels se mexe: não precisa de 60 fps. Com a janela sem foco (a
+// pessoa usando outro programa), menos ainda. Animações de verdade (surgir, limpar) seguem a 60.
+const IDLE_FPS = 15;
+const BACKGROUND_FPS = 5;
 
 type Mode = 'empty' | 'scanning' | 'ready';
 
@@ -40,6 +44,8 @@ export class PixelBar {
   private width = 0;
   private cols = 0;
   private running = false;
+  /** espera até o próximo quadro parado (null = acordado) */
+  private sleep: ReturnType<typeof setTimeout> | null = null;
   private lastDraw = 0;
   private time = 0;
 
@@ -82,6 +88,9 @@ export class PixelBar {
   setHover(id: CategoryId | null) {
     if (this.hover === id) return;
     this.hover = id;
+    // a onda de luz atravessa o bloco a cada vez que o mouse (ou o foco) chega na categoria
+    const s = id === null ? undefined : this.find(id);
+    if (s && !this.reduceMotion) s.hoverAt = performance.now() / 1000;
     this.kick();
   }
 
@@ -139,31 +148,56 @@ export class PixelBar {
 
   /** Pulso dos pixels e onda de análise rodam sem parar (exceto com "reduzir movimento") */
   private get ambient() {
-    return !this.reduceMotion && (this.mode === 'scanning' || (this.mode === 'ready' && this.segs.length > 0));
+    // 'ready' sem blocos também anima: é o pixel piscando de "Tudo limpo"
+    return !this.reduceMotion && (this.mode === 'scanning' || this.mode === 'ready');
   }
 
   private kick() {
+    // dormindo entre quadros parados: acorda já (hover, limpeza etc. não podem esperar)
+    if (this.sleep !== null) {
+      clearTimeout(this.sleep);
+      this.sleep = null;
+      requestAnimationFrame(this.frame);
+      return;
+    }
     if (this.running) return;
     this.running = true;
     requestAnimationFrame(this.frame);
   }
 
   private frame = (now: number) => {
+    this.sleep = null;
+    // dt limitado: depois de a janela ficar encoberta, não pula a animação inteira de uma vez
+    const dt = Math.min(0.1, Math.max(0, now / 1000 - this.time));
     this.time = now / 1000;
-    const moving = this.step();
+    const moving = this.step(dt);
     const keepGoing = moving || this.ambient;
-    // Parado, desenha só a ~30 fps para poupar CPU
-    if (moving || !keepGoing || now - this.lastDraw >= 1000 / IDLE_FPS) {
+    // Parado, desenha poucas vezes por segundo para poupar CPU
+    const idleFps = document.hasFocus() ? IDLE_FPS : BACKGROUND_FPS;
+    if (moving || !keepGoing || now - this.lastDraw >= 1000 / idleFps) {
       this.lastDraw = now;
       this.draw();
     }
-    if (keepGoing) requestAnimationFrame(this.frame);
-    else this.running = false;
+    if (!keepGoing) this.running = false;
+    else if (moving) requestAnimationFrame(this.frame);
+    // parado: dorme até o próximo quadro que vai desenhar, em vez de acordar a cada atualização
+    // da tela (60+ vezes por segundo) só para descobrir que não há nada a fazer
+    else {
+      this.sleep = setTimeout(() => {
+        this.sleep = null; // já acordou: um kick() agora não pode abrir um segundo loop
+        requestAnimationFrame(this.frame);
+      }, 1000 / idleFps);
+    }
   };
 
   /** Avança um quadro; devolve true enquanto algo ainda se mexe (fora o pulso) */
-  private step(): boolean {
-    let moving = stepSegments(this.segs);
+  private step(dt: number): boolean {
+    let moving = stepSegments(this.segs, dt);
+    for (const s of this.segs) {
+      if (s.hoverAt === null) continue;
+      if (this.time - s.hoverAt > rippleDuration(Math.ceil(s.W))) s.hoverAt = null;
+      else moving = true;
+    }
     if (this.revealStart !== null) {
       const visible = this.segs.filter((s) => s.W >= 0.05).length;
       const total = Math.max(0, visible - 1) * APPEAR_SEG_STAGGER + APPEAR_SEG_TOTAL;
@@ -201,6 +235,7 @@ export class PixelBar {
         x += s.W * PITCH;
         order++;
       }
+      if (order === 0) drawRestingPixel(ctx, pass, this.cols, t); // nada para limpar
     }
     drawParticles(ctx, this.particles);
   }

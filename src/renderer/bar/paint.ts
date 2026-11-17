@@ -1,8 +1,11 @@
 // Desenho da barra: a trilha (com a onda de análise), cada bloco, a faísca e o bloom.
 // Só desenha; quem decide tamanhos e tempos é pixel-bar.ts.
 import type { CategoryId } from '../../shared/types';
-import { OUTLINE_FADE, drawCells } from './cells';
-import { BAR_H, BG, CELL, FREE, PITCH, ROWS, TOP_ROOM, cellY, rand, roundRect, type Pass, type Segment } from './geometry';
+import { OUTLINE_FADE } from './appear';
+import { drawCells } from './cells';
+import { DORMANT } from './effects';
+import { BAR_H, BG, CELL, PITCH, ROWS, TOP_ROOM, cellY, rand, roundRect, type Pass, type Segment } from './geometry';
+import { drawGlass, steppedRect } from './led';
 
 /** Onda do "scanner" que passa pelos pontinhos vazios durante a análise (0 a 1) */
 function scanWave(col: number, row: number, cols: number, t: number): number {
@@ -35,8 +38,11 @@ export function drawTrack(ctx: CanvasRenderingContext2D, pass: Pass, width: numb
       if (pass === 'glow') {
         if (wave < 0.1) continue;
         ctx.fillStyle = `rgba(200,220,255,${wave * 0.55})`;
+      } else if (!wave) {
+        drawGlass(ctx, 2 + i * PITCH, cellY(r)); // vazio: vidro escuro
+        continue;
       } else {
-        ctx.fillStyle = wave ? `rgba(225,235,255,${0.045 + wave * 0.3})` : FREE;
+        ctx.fillStyle = `rgba(225,235,255,${0.045 + wave * 0.3})`;
       }
       ctx.fillRect(2 + i * PITCH, cellY(r), CELL, CELL);
     }
@@ -52,8 +58,10 @@ export function drawSegment(
   t: number | null, appear: number | null,
 ): number {
   const dim = hover !== null && hover !== s.id;
-  const shown = appear === null ? 1 : Math.min(1, Math.max(0, appear / OUTLINE_FADE));
+  // desmarcada: contorno e luz de fundo quase somem junto com os pixels
+  const shown = (appear === null ? 1 : Math.min(1, Math.max(0, appear / OUTLINE_FADE))) * (0.22 + 0.78 * s.on);
   const alpha = dim ? 0.3 : 1;
+  const rippleAge = t === null || s.hoverAt === null ? null : t - s.hoverAt;
   const width = s.W * PITCH;
   const litCols = Math.min(s.lit, s.W);
   const litWidth = litCols * PITCH;
@@ -79,16 +87,18 @@ export function drawSegment(
     }
   }
   drawCells(ctx, pass, {
-    x, count: Math.ceil(s.W), litCount: Math.round(litCols), seed: s.index + 11,
-    color: s.color, alpha: glowAlpha, t, appear,
+    x, count: Math.ceil(s.W), litCount: Math.round(litCols), litEdge: litCols, clearing: s.clearing,
+    seed: s.index + 11, color: s.color, alpha: glowAlpha, t, appear,
+    on: s.on, waking: s.onTarget > s.on, rippleAge,
   });
   ctx.restore();
 
   if (litWidth > 1.5 && shown > 0) {
     ctx.save();
     ctx.globalAlpha = glowAlpha * shown;
-    roundRect(ctx, x + 0.75, TOP_ROOM + 0.75, litWidth - 1.5, BAR_H - 1.5, 8);
-    ctx.strokeStyle = s.color;
+    // contorno com cantos em degrau (pixel art), no lugar da linha arredondada
+    steppedRect(ctx, x + 0.75, TOP_ROOM + 0.75, litWidth - 1.5, BAR_H - 1.5, 2.5);
+    ctx.strokeStyle = s.on < 0.5 ? DORMANT : s.color;
     ctx.lineWidth = pass === 'glow' ? 2.5 : 1.5;
     ctx.stroke();
     ctx.restore();
@@ -103,19 +113,48 @@ export function drawSweep(ctx: CanvasRenderingContext2D, pass: Pass, x: number) 
   ctx.fillRect(x - w / 2, TOP_ROOM - 3, w, BAR_H + 6);
 }
 
-/** Bloom: [raio do desfoque em px, intensidade] — um halo largo e um mais justo */
-const BLOOM_PASSES: Array<[blur: number, strength: number]> = [[14, 0.9], [4, 0.75]];
+/** Bloom: [raio do desfoque em px, intensidade] — um véu bem largo, um halo e um brilho justo */
+const BLOOM_PASSES: Array<[blur: number, strength: number]> = [[30, 0.4], [14, 0.95], [4, 0.8]];
 
 /** Borra a camada de brilho e soma por cima da imagem (luz somada = bloom) */
+/**
+ * O desfoque é a parte cara do quadro. Ele é feito em meia resolução (um quarto dos pixels) num
+ * canvas auxiliar e depois ampliado: como é luz borrada, a diferença não aparece.
+ */
+const BLOOM_SCALE = 0.5;
+const small = document.createElement('canvas');
+const sctx = small.getContext('2d');
+
 export function applyBloom(ctx: CanvasRenderingContext2D, glow: HTMLCanvasElement, dpr: number) {
-  if (!glow.width || !glow.height) return; // drawImage falha com canvas de tamanho 0
+  if (!glow.width || !glow.height || !sctx) return; // drawImage falha com canvas de tamanho 0
+  const w = Math.max(1, Math.round(glow.width * BLOOM_SCALE));
+  const h = Math.max(1, Math.round(glow.height * BLOOM_SCALE));
+  if (small.width !== w || small.height !== h) {
+    small.width = w;
+    small.height = h;
+  }
   ctx.save();
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.globalCompositeOperation = 'lighter';
   for (const [blur, strength] of BLOOM_PASSES) {
-    ctx.filter = `blur(${blur * dpr}px)`;
+    sctx.clearRect(0, 0, w, h);
+    sctx.filter = `blur(${blur * dpr * BLOOM_SCALE}px)`;
+    sctx.drawImage(glow, 0, 0, w, h);
     ctx.globalAlpha = strength;
-    ctx.drawImage(glow, 0, 0);
+    ctx.drawImage(small, 0, 0, glow.width, glow.height);
   }
   ctx.restore();
+}
+
+/**
+ * "Tudo limpo": a barra fica só com o vidro vazio e um pixel piscando devagar no meio, embaixo,
+ * como um cursor esperando. t = null (reduzir movimento): o pixel fica aceso, parado.
+ */
+export function drawRestingPixel(ctx: CanvasRenderingContext2D, pass: Pass, cols: number, t: number | null) {
+  const col = Math.floor(cols / 2);
+  const pulse = t === null ? 0.7 : 0.25 + 0.75 * (0.5 + 0.5 * Math.sin(t * 2.2)) ** 2;
+  ctx.globalAlpha = pulse * (pass === 'glow' ? 0.8 : 1);
+  ctx.fillStyle = '#DDE6FF';
+  ctx.fillRect(2 + col * PITCH, cellY(ROWS - 1), CELL, CELL);
+  ctx.globalAlpha = 1;
 }

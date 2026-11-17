@@ -42,7 +42,7 @@ o que o app faz para evitar. Feita em 12/11/2026 e ampliada em 13/11/2026, sobre
 - Arquivos **em uso** não são apagados (o Windows não deixa); o app pula e conta como "ficaram
   para a próxima". Por isso limpar com o navegador aberto é seguro, só libera menos.
 - O usuário vê **todas as pastas reais** antes de limpar (☰).
-- **Diálogo de confirmação com avisos:** antes de apagar, cada categoria marcada aparece com o que vai acontecer (ex.: "Feche os navegadores antes"). O que não volta (Lixeira) aparece primeiro, em vermelho, e o botão só libera depois de marcar "Entendi". O foco começa em "Cancelar", para um Enter apressado não apagar nada.
+- **Diálogo de confirmação com avisos:** antes de apagar, cada categoria marcada aparece com o que vai acontecer, e os programas que precisam estar fechados aparecem num bloco "feche antes" (campo `closeFirst`). Só com caches o diálogo é leve ("Limpar X?"); se houver algo que não volta (Lixeira), ele vira "Apagar X?", esse item aparece primeiro, em vermelho, e o botão só libera depois de marcar "Entendi". O foco começa em "Cancelar", para um Enter apressado não apagar nada.
 - A tela não consegue pedir para apagar nada fora da lista (IPC só aceita ids de categoria).
 
 ## Detalhe por categoria
@@ -94,8 +94,10 @@ do perfil com os dados).
 | `NuGet\v3-cache` | `dotnet nuget locals http-cache --clear` | é só o cache HTTP; a pasta de pacotes instalados (`.nuget\packages`) **não** é tocada ([Microsoft Learn][nuget]) |
 | `go-build` | `go clean -cache` | |
 | `electron\Cache` | cache do `@electron/get` | versões do Electron baixadas pelo `npm install`; baixa de novo ([@electron/get][electron-get]) |
+| `node-gyp\Cache` | `node-gyp remove <versão>` | cabeçalhos do Node baixados para compilar módulos nativos. O README define `--devdir` como "SDK download directory (default is OS cache directory)" e diz que o node-gyp "downloads the necessary development files or headers for the target version": no próximo build ele baixa de novo ([node-gyp][node-gyp]) |
+| `Composer\files`, `Composer\repo` | `composer clear-cache` | padrão no Windows: `C:\Users\<user>\AppData\Local\Composer`; `files` "stores the zip archives of packages", `repo` guarda metadados de repositórios ([Composer][composer]). Os clones de repositório (`vcs`) **não** são tocados |
 
-- **Fora de propósito:** a cache do **uv** (a documentação dele diz que só é seguro limpar com `uv cache clean`, apagar à mão pode corromper ([uv][uv])), `pnpm\store`, `.nuget\packages` e `Yarn\Berry`.
+- **Fora de propósito:** a cache do **uv** (a documentação dele diz que só é seguro limpar com `uv cache clean`, apagar à mão pode corromper ([uv][uv])), `pnpm\store`, `.nuget\packages` e `Yarn\Berry`. A cache do **Deno** também fica de fora: a documentação oferece `deno clean` para isso ([Deno][deno-clean]), então segue a regra "limpar só com o comando do programa". A cache de tipos do **TypeScript** (`Microsoft\TypeScript`) fica de fora por falta de fonte oficial do local no Windows.
 
 - **Efeito colateral:** o próximo `npm install`, `pip install`, build etc. baixa/compila de novo
   e demora mais. Sem internet, instalar pacotes que estavam só no cache falha até voltar a conexão.
@@ -178,6 +180,9 @@ documentação oficial; por isso Windows Update ficou com proteções extras.
 [wu-qa2]: https://learn.microsoft.com/en-gb/answers/questions/1334760/what-will-happen-if-i-delete-software-distribution
 [electron-get]: https://packages.electronjs.org/get
 [uv]: https://docs.astral.sh/uv/concepts/cache
+[node-gyp]: https://github.com/nodejs/node-gyp/blob/main/README.md
+[composer]: https://getcomposer.org/doc/06-config.md
+[deno-clean]: https://docs.deno.com/runtime/reference/cli/clean/
 [wise]: https://www.wisecleaner.com/think-tank/772-What-Is-DirectX-Shader-Cache-and-How-to-Clear-It.html
 [nv]: https://github.com/Kkthnx/NvidiaShaderCleanup
 [steam]: https://steamcommunity.com/discussions/forum/1/558747288083286747

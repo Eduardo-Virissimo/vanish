@@ -1,0 +1,94 @@
+/*
+ * Histórico na gaveta (views/history.ts): total liberado e as últimas 8 semanas em pixels.
+ * Cada semana é uma coluna de 10 pixels; acesos de baixo para cima com o degradê do símbolo
+ * (azul embaixo, ciano em cima), apagados como o vidro vazio da barra.
+ */
+.history {
+  margin: 0 12px;
+  padding: 18px 12px 18px;
+  border-bottom: 1px solid var(--line);
+}
+.history-title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+}
+.history-total {
+  margin: 4px 0 0;
+  font-family: var(--display);
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.15;
+}
+.history-sub { margin: 2px 0 0; font-size: 13px; color: var(--muted); }
+
+.history-chart {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 8px;
+  margin-top: 14px;
+}
+.hist-col {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2px;
+  justify-items: stretch;
+}
+/* cada "pixel" ocupa as duas coluninhas: barras largas feitas de quadradinhos */
+.hist-col i {
+  grid-column: 1 / -1;
+  height: 6px;
+  border-radius: 1.5px;
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+.hist-col i.on {
+  /* --row 0 (embaixo) → 9 (em cima): azul do símbolo indo para o ciano */
+  background: color-mix(in srgb, #3D8BFF, #68CCFF calc(var(--row) * 10%));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.2),
+    0 0 6px color-mix(in srgb, #3D8BFF 35%, transparent);
+}
+/* a semana atual tem um traço embaixo, para achar "agora" no gráfico */
+.hist-col.is-now { position: relative; }
+.hist-col.is-now::after {
+  content: "";
+  grid-column: 1 / -1;
+  height: 2px;
+  margin-top: 3px;
+  border-radius: 1px;
+  background: var(--muted);
+}
+
+.history-axis {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/*
+ * Ao abrir a gaveta, as colunas sobem pixel a pixel (de baixo para cima, da semana mais antiga
+ * para a atual), cada pixel chegando com um "pop" e um lampejo. O pixel do topo de cada coluna
+ * fica com brilho fixo.
+ * Não há animação contínua aqui de propósito: um pulso no topo e uma faixa de luz passando
+ * repintavam o gráfico a cada quadro e levavam o app a ~90% de um núcleo com a gaveta aberta.
+ */
+.app.panel-open .hist-col i.on {
+  animation: hist-in 340ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation-delay: calc(200ms + var(--col) * 55ms + var(--row) * 40ms);
+}
+.hist-col i.on.top {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    0 0 10px color-mix(in srgb, #68CCFF 70%, transparent);
+}
+@keyframes hist-in {
+  from { opacity: 0; transform: scale(0); }
+  55% { transform: scale(1.3, 1.6); filter: brightness(2); }
+}

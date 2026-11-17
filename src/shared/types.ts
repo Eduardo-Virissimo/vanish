@@ -21,6 +21,8 @@ export interface CategoryInfo {
   /** false = começa desmarcada (o usuário precisa escolher; ex.: Lixeira) */
   defaultSelected: boolean;
   warning?: CategoryWarning;
+  /** programas que precisam estar fechados para a limpeza render tudo (ex.: "Steam e Epic") */
+  closeFirst?: string;
 }
 
 export interface DiskInfo {
@@ -61,4 +63,12 @@ export interface CleanResult {
 export interface InitData {
   home: string;
   categories: CategoryInfo[];
+  /** já roda como administrador (senão algumas categorias mostram "Precisa de admin") */
+  isAdmin: boolean;
+}
+
+/** Atualização pelo GitHub: baixando em segundo plano ou pronta para instalar ao reiniciar */
+export interface UpdateStatus {
+  state: 'downloading' | 'ready';
+  version: string;
 }

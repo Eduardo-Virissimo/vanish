@@ -41,10 +41,13 @@ cleaner/
 │   │   └── recycle-bin.ts  lê o tamanho e esvazia a Lixeira
 │   │
 │   ├── main/               processo principal do Electron
-│   │   ├── index.ts        entrada: registra o IPC e abre a janela
+│   │   ├── index.ts        entrada: uma janela só (trava de instância), sem menu padrão, registra o IPC e abre a janela
 │   │   ├── window.ts       cria a janela (tamanho, cores, segurança, trazer para a frente)
 │   │   ├── ipc.ts          responde aos pedidos da tela usando o motor
-│   │   └── timing.ts       utilitários: limitar envios e impedir duas tarefas ao mesmo tempo
+│   │   ├── timing.ts       utilitários: limitar envios e impedir duas tarefas ao mesmo tempo
+│   │   ├── taskbar.ts      progresso no ícone da barra de tarefas (análise e limpeza)
+│   │   ├── admin.ts        saber se roda como administrador e reabrir o próprio app elevado (UAC)
+│   │   └── updater.ts      atualização automática pelas releases do GitHub (electron-updater)
 │   │
 │   ├── preload/
 │   │   └── index.ts        ponte segura: expõe window.cleaner para a tela
@@ -54,21 +57,31 @@ cleaner/
 │       ├── main.ts         entrada: monta as views, liga os botões, abre a tela de abertura
 │       ├── controller.ts   ações (analisar, limpar, confirmar) e reação aos avisos do main
 │       ├── state.ts        estado da tela e consultas (o que está selecionado, quanto soma…)
-│       ├── format.ts       formata bytes ("9,4 GB"), plurais e caminhos
+│       ├── memory.ts       o que a tela lembra entre sessões (histórico de limpezas e categorias desmarcadas, localStorage)
+│       ├── format.ts       formata bytes ("9,4 GB"), plurais, caminhos e "há N dias"
 │       ├── dom.ts          atalho $() para buscar elementos
 │       ├── global.d.ts     diz ao TypeScript que window.cleaner existe
 │       ├── views/          cada parte da tela se desenha a partir do estado
 │       │   ├── splash.ts       tela de abertura (símbolo + "vanish" sobre preto)
-│       │   ├── header.ts       espaço usado, status e "Analisar de novo"
+│       │   ├── header.ts       número grande (para liberar / liberados), disco usado, status, "Analisar de novo"
+│       │   ├── tween.ts        número que corre até o valor novo (respeita "reduzir movimento")
 │       │   ├── categories.ts   grade de categorias com checkbox
-│       │   ├── footer.ts       mensagem e botão de limpar (que abre a confirmação)
-│       │   ├── confirm.ts      diálogo "Apagar X GB?" com o aviso de cada categoria
-│       │   └── panel.ts        menu do ☰: marca e as pastas reais
+│       │   ├── footer.ts       mensagem e botão de limpar (que abre a confirmação; depois de erro, analisa de novo)
+│       │   ├── confirm.ts      diálogo "Limpar X GB?" / "Apagar X GB?" (peso conforme o risco), "feche antes" e avisos
+│       │   ├── admin-hint.ts   "X precisa de administrador" + botão "Abrir como administrador"
+│       │   ├── history.ts      histórico na gaveta: total liberado e 8 semanas em pixels
+│       │   ├── panel-edge.ts   borda da gaveta: pixels LED animados nas cores das categorias (canvas)
+│       │   ├── menu-icon.ts    o ☰: cor e deslocamento de cada linha para o hover e a abertura
+│       │   ├── update.ts       botão "Atualizar para x.y.z" no topo (só com a versão nova já baixada)
+│       │   └── panel.ts        menu do ☰: marca, histórico e as pastas reais
 │       ├── bar/            a barra de pixels (canvas)
 │       │   ├── pixel-bar.ts    estado e loop de animação (orquestra o resto)
 │       │   ├── layout.ts       cálculo puro: quanto cada bloco ocupa e animação dos tamanhos
 │       │   ├── paint.ts        desenho: trilha e onda de análise, blocos, faísca, bloom
-│       │   ├── cells.ts        os quadradinhos: pulso, surgimento com "pop"
+│       │   ├── cells.ts        os quadradinhos: quais acendem e o pulso
+│       │   ├── appear.ts       surgimento dos blocos com "pop" (fim da análise)
+│       │   ├── effects.ts      efeitos por pixel: adormecer/acordar, onda do hover, desfazer na limpeza, queda
+│       │   ├── led.ts          acabamento "LED de vidro": reflexo, degradê de calor, vidro vazio, cantos em degrau
 │       │   ├── particles.ts    fagulhas que sobem da faísca de limpeza
 │       │   └── geometry.ts     medidas, tipos e utilitários compartilhados
 │       ├── fonts/          Sora (fonte do nome) + licença OFL-Sora.txt
@@ -116,6 +129,9 @@ Definidos em `src/shared/ipc.ts`.
 | `clean` | pedido | limpa as categorias pedidas (só ids conhecidos) |
 | `folder:open` | pedido | abre no Explorador uma pasta **da última análise** (outras são recusadas) |
 | `window:splash-done` | pedido | a abertura terminou; a barra de título volta à cor do app |
+| `update:install` | pedido | reinicia instalando a versão nova já baixada; `false` se não estiver pronta ou houver análise/limpeza rodando |
+| `update:status` | aviso | versão nova encontrada no GitHub (`downloading`) ou pronta para instalar (`ready`) |
+| `app:relaunch-admin` | pedido | reabre o próprio Vanish como administrador (aviso do UAC); `false` se a pessoa recusar. Caminho fixo, nunca vindo da tela |
 | `progress:path` | aviso | arquivo sendo lido/apagado agora (no máximo a cada 60 ms) |
 | `scan:category` | aviso | uma categoria terminou de ser analisada |
 | `clean:start` / `clean:progress` / `clean:category` | aviso | início, bytes apagados até agora e resultado de cada categoria |
@@ -142,6 +158,15 @@ começa por trás; ao sumir, a tela chama `window:splash-done`.
 3. Avisos `clean:start`, `clean:progress` e `clean:category` (com o que sobrou em cada pasta).
 4. A barra usa o progresso real para mover a faísca.
 
+### Erros
+A tela nunca mostra falha como sucesso. `state.problem` guarda o que deu errado (`'scan'` ou
+`'clean'`):
+- análise falhou: o número grande vira "—" ("A análise não terminou") e o botão do rodapé vira
+  "Analisar de novo";
+- limpeza parou no meio: mostra só o que de fato saiu (soma dos avisos `clean:category`) e o
+  botão também vira "Analisar de novo";
+- pasta que não abre no Explorador (sumiu depois da análise): a linha passa a dizer "Não existe mais".
+
 ```
 renderer                     preload                 main + cleaner
 ────────                     ───────                 ──────────────
@@ -151,3 +176,40 @@ invoke('clean', ids)  ──▶                      ──▶   guard → clean
                       ◀──                      ◀──   clean:start, clean:progress, clean:category
 invoke('folder:open') ──▶                      ──▶   só abre pastas da última análise
 ```
+
+## Desempenho
+
+Medido em 16/11/2026 (12 núcleos, CPU somada dos processos do app):
+
+| Situação | CPU | Memória |
+|---|---|---|
+| Parado, tela principal, com foco | ~15% de 1 núcleo (~1,2% do PC) | ~600 MB |
+| Parado, sem foco (outro programa na frente) | ~4% de 1 núcleo | ~600 MB |
+| Gaveta aberta | ~29% de 1 núcleo | ~600 MB |
+| Minimizado | 0% | ~560 MB |
+
+Regras que mantêm isso (não quebrar):
+- A barra parada desenha a 15 quadros/s (5 sem foco) e **dorme entre quadros** com `setTimeout`,
+  em vez de acordar a cada atualização da tela; `kick()` acorda na hora quando algo muda.
+  Animações de verdade (surgir, limpar, onda) seguem a 60.
+- O bloom é desfocado em meia resolução (`BLOOM_SCALE` em `bar/paint.ts`).
+- A borda da gaveta só anima com a gaveta aberta, no mesmo esquema de quadros.
+- **Nada de animação CSS contínua em `filter`, `box-shadow` ou `mix-blend-mode`** em muitos
+  elementos: cada quadro repinta tudo. Um pulso e uma faixa de luz no histórico levaram a gaveta
+  a ~90% de um núcleo. Contínuo, só `transform`/`opacity`, e mesmo assim medindo.
+- Como medir: abrir uma cópia com perfil próprio (`--user-data-dir`) e somar o
+  `TotalProcessorTime` dos processos `electron.exe` filhos em 10 s.
+
+## Instalador e atualização
+
+- `npm run dist` usa o **electron-builder** (configuração no campo `build` do `package.json`) para
+  gerar `release/Vanish-Setup-x.y.z.exe`: instalador NSIS de um clique, por usuário, sem admin.
+  O `electron-updater` fica fora do bundle do esbuild (`external`) e entra como dependência
+  normal no `app.asar`.
+- `.github/workflows/release.yml`: ao receber uma tag `vX.Y.Z`, o GitHub confere que a tag bate
+  com o `package.json`, roda typecheck e testes, gera o instalador e publica a release com o
+  `latest.yml` e o `.blockmap`.
+- `main/updater.ts` (só no app instalado): procura versão nova 5 s depois de abrir e a cada 6 h,
+  baixa em segundo plano, avisa a tela (`update:status`) e instala ao fechar. O botão da tela
+  (`update:install`) reinicia na hora, mas nunca no meio de uma análise ou limpeza.
+- Passo a passo para publicar: [RELEASE.md](RELEASE.md).

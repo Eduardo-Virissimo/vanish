@@ -9,6 +9,7 @@ mudar código. A documentação fica em [`docs/`](docs/README.md):
 - [docs/CLEANUP-CANDIDATES.md](docs/CLEANUP-CANDIDATES.md): alvos pesquisados e proibidos
 - [docs/DESIGN.md](docs/DESIGN.md): visual
 - [docs/ROADMAP.md](docs/ROADMAP.md): o que vem depois
+- [docs/RELEASE.md](docs/RELEASE.md): instalador e publicação de versões (atualização automática)
 
 ## Comandos
 
@@ -18,6 +19,7 @@ npm run typecheck    # SEMPRE rodar depois de mudar código; precisa passar sem 
 npm test             # SEMPRE rodar: regras de segurança das categorias + motor em pastas falsas
 npm run build        # compila src/ → dist/
 npm start            # build + abre o app
+npm run dist         # gera o instalador em release/ (publicar: tag vX.Y.Z, ver docs/RELEASE.md)
 npm run logo         # regenera assets/logo.svg (ícone) e assets/mark.svg (símbolo)
 npm run icon         # regenera assets/icon.png (depois do logo)
 ```
@@ -98,6 +100,8 @@ Este app **apaga arquivos**. Um erro aqui destrói dados do usuário.
 | Janela voltando fora do lugar ao restaurar tamanho | `getBounds()` logo após `setBounds()` vem atrasado | guardar o valor pedido, não o lido |
 | Arquivo com BOM/encoding errado | `Set-Content` do PowerShell 5.1 grava com BOM/ANSI | editar com as ferramentas de arquivo ou `UTF8Encoding($false)` |
 | Linhas grudadas ao remover blocos de código | substituições que apagam a quebra de linha | conferir o trecho depois de remover |
+| App empacotado ou `npm start` fecha sozinho ao abrir | trava de "uma janela só": outra cópia do Vanish (inclusive um `electron.exe` de desenvolvimento esquecido) já está aberta | fechar todas as cópias (`Get-Process electron, Vanish | Stop-Process`) antes de abrir |
+| Animação CSS parada / print atrasado no teste | janela do Electron coberta por outras: o Chromium pausa animações e quadros | `Page.bringToFront` + `Emulation.setFocusEmulationEnabled` no teste por CDP |
 
 ## Decisões do usuário (não reverter sem pedir)
 

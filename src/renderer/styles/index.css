@@ -5,8 +5,10 @@
 @import './header.css';
 @import './bar.css';
 @import './categories.css';
+@import './admin-hint.css';
 @import './footer.css';
 @import './panel.css';
 @import './folders.css';
+@import './history.css';
 @import './confirm.css';
 @import './splash.css';

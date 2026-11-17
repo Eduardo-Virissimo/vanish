@@ -28,6 +28,8 @@
   transition: color 120ms, background-color 120ms, transform var(--menu-ease);
 }
 .menu-btn:hover { color: var(--text); background: rgba(255, 255, 255, 0.07); }
+/* colado no canto da janela: o anel de foco fica por dentro para não ser cortado */
+.menu-btn:focus-visible { outline-offset: -2px; }
 
 /* aberto: vai até o canto direito da gaveta */
 .app.panel-open .menu-btn {
@@ -35,7 +37,11 @@
   transform: translateX(calc(min(var(--panel-w), 86vw) - 46px));
 }
 
-/* as três linhas do ☰; abertas, a de cima e a de baixo giram e formam um X */
+/*
+ * O ☰ (views/menu-icon.ts): três linhas; aberto, a de cima e a de baixo giram e formam o X.
+ * Cada linha tem a cor de uma categoria (--lc): no hover se soltam para os lados (--jx), acendem
+ * nessa cor com brilho e voltam; ao abrir, piscam na cor no meio do giro e chegam brancas no X.
+ */
 .menu-icon { position: relative; width: 18px; height: 14px; }
 .menu-icon span {
   position: absolute;
@@ -44,7 +50,7 @@
   height: 1.8px;
   border-radius: 2px;
   background: currentColor;
-  transition: transform var(--menu-ease), opacity 160ms ease;
+  transition: transform var(--menu-ease), opacity var(--menu-ease);
 }
 .menu-icon span:nth-child(1) { top: 0; }
 .menu-icon span:nth-child(2) { top: 6.1px; }
@@ -52,6 +58,18 @@
 .app.panel-open .menu-icon span:nth-child(1) { transform: translateY(6.1px) rotate(45deg); }
 .app.panel-open .menu-icon span:nth-child(2) { opacity: 0; transform: scaleX(0.3); }
 .app.panel-open .menu-icon span:nth-child(3) { transform: translateY(-6.1px) rotate(-45deg); }
+
+.app.panel-open .menu-icon span { animation: line-flash 420ms ease-out calc(var(--n) * 40ms); }
+@keyframes line-flash {
+  45% { background: var(--lc); box-shadow: 0 0 8px var(--lc); }
+}
+.menu-btn:hover .menu-icon span {
+  animation: line-loose 640ms cubic-bezier(0.2, 0.8, 0.2, 1) calc(var(--n) * 50ms);
+}
+@keyframes line-loose {
+  35% { translate: var(--jx) 0; background: var(--lc); box-shadow: 0 0 8px var(--lc); }
+  70% { translate: 0 0; background: var(--lc); box-shadow: 0 0 4px var(--lc); }
+}
 
 .scrim {
   position: absolute;
@@ -70,8 +88,8 @@
   left: 0;
   z-index: 11;
   width: min(var(--panel-w), 86vw);
-  background: #1F2023;
-  border-right: 1px solid var(--line);
+  background: var(--surface-panel);
+  /* sem linha na borda: ela se desfaz em pixels coloridos (canvas .panel-edge) */
   box-shadow: 24px 0 60px rgba(0, 0, 0, 0.45);
   transform: translateX(-102%);
   /* Fechado, o menu fica invisível de verdade: senão a sombra dele (que passa uns 75 px da borda)
@@ -84,6 +102,7 @@
   will-change: transform;
 }
 .panel:focus { outline: none; }
+
 
 /*
  * Aberto, a gaveta e o fundo escuro cobrem a barra de título, que normalmente arrasta a janela.
@@ -106,6 +125,8 @@
   user-select: text;
 }
 .panel-inner::-webkit-scrollbar { width: 10px; }
+/* a trilha começa abaixo da linha do X (40 px), para a barra de rolagem não passar por baixo dele */
+.panel-inner::-webkit-scrollbar-track { margin-top: 40px; margin-bottom: 4px; }
 .panel-inner::-webkit-scrollbar-thumb {
   border: 3px solid transparent;
   border-radius: 10px;
@@ -117,6 +138,11 @@
 
 /* cabeçalho na altura da barra de título (40 px), na mesma linha do X; à direita, espaço para ele */
 .panel-brand {
+  /* a marca fica fixa no topo (na linha do X); só as pastas rolam por baixo */
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--surface-panel);
   display: flex;
   align-items: center;
   gap: 6px;
@@ -148,10 +174,11 @@
 }
 
 .panel-count {
+  font-variant-numeric: tabular-nums;
   margin: 4px 24px 0;
   min-height: 18px;
-  font-size: 13px;
-  color: var(--muted);
+  font-size: 14px;
+  color: var(--soft);
 }
 
 .panel-intro {
@@ -163,3 +190,17 @@
 
 .panel-list { padding: 10px 12px 0; }
 
+
+/*
+ * Borda direita da gaveta: pixels LED nas cores das categorias (na ordem da barra, de cima para
+ * baixo), espalhados e cada vez mais ralos para fora, como o símbolo se desfazendo.
+ * Desenhada uma vez num canvas (views/panel-edge.ts); fica fora da gaveta e anda com ela.
+ */
+.panel-edge {
+  position: absolute;
+  top: 0;
+  left: 100%;
+  width: 44px; /* 3 colunas de pixels + espaço para o brilho se espalhar */
+  height: 100%;
+  pointer-events: none;
+}

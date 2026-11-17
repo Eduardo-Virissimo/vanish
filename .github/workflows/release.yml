@@ -1,0 +1,49 @@
+# Publica uma versão nova do Vanish no GitHub Releases.
+# Como usar (ver docs/RELEASE.md): suba a versão no package.json, faça commit, e então
+#   git tag v0.5.0 && git push origin v0.5.0
+# O GitHub roda os testes, gera o instalador e cria a release. Os apps instalados
+# encontram a versão nova sozinhos (electron-updater lê o latest.yml da release).
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write # criar a release e subir o instalador
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Instalar dependências
+        run: npm ci
+
+      # a tag e o package.json precisam dizer a mesma versão; senão o atualizador se confunde
+      - name: Conferir versão da tag
+        shell: bash
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          pkg="$(node -p "require('./package.json').version")"
+          if [ "$tag" != "$pkg" ]; then
+            echo "A tag é v$tag, mas o package.json diz $pkg. Ajuste um dos dois."
+            exit 1
+          fi
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Testes (regras de segurança + motor em pastas falsas)
+        run: npm test
+
+      - name: Gerar instalador e publicar a release
+        run: npm run build && npx electron-builder --win --publish always
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

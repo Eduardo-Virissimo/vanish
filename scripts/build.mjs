@@ -4,7 +4,7 @@ import * as esbuild from 'esbuild';
 import { cp, mkdir, rm } from 'node:fs/promises';
 
 const common = { bundle: true, sourcemap: 'linked', target: 'es2022', logLevel: 'warning' };
-const node = { ...common, platform: 'node', format: 'cjs', external: ['electron'] };
+const node = { ...common, platform: 'node', format: 'cjs', external: ['electron', 'electron-updater'] }; // o electron-updater vai como dependência (node_modules) no instalador
 
 await rm('dist', { recursive: true, force: true });
 await mkdir('dist/renderer', { recursive: true });

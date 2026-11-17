@@ -24,6 +24,9 @@ export function throttle<T>(fn: (value: T) => void, ms: number): (value: T) => v
 
 let busy = false;
 
+/** tem análise ou limpeza rodando agora (a atualização espera terminar) */
+export const isBusy = () => busy;
+
 /** Impede que uma análise e uma limpeza rodem ao mesmo tempo */
 export async function exclusive<T>(task: () => Promise<T>): Promise<T> {
   if (busy) throw new Error('Já existe uma tarefa em andamento');

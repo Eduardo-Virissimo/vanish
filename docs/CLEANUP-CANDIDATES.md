@@ -11,17 +11,15 @@ mesmas regras da [auditoria de segurança](SAFETY-AUDIT.md) e virar linha lá.
 Saíram desta lista e estão na [auditoria](SAFETY-AUDIT.md): cache de shaders do DirectX, NVIDIA
 (`DXCache`, `GLCache`) e AMD (`DxCache`); cache web da Steam (só as pastas de cache da `htmlcache`)
 e da Epic (`webcache*`); cache do Electron; caches de Obsidian, Notion e Postman (só as pastas de
-cache).
+cache). Em 16/11/2026: cache do node-gyp (`node-gyp\Cache`) e do Composer (`files` e `repo`).
 
 ## 🟢 Bons candidatos (prioridade)
 
 | Alvo | Caminho | Por que é seguro | Falta |
 |---|---|---|---|
 | Cache de Internet do Windows | `%LOCALAPPDATA%\Microsoft\Windows\INetCache` | cache de páginas de componentes antigos/WebView; recriado | fonte; libera pouco (0,4 MB no PC auditado). **Não** confundir com `WebCache` (banco de dados preso pelo sistema) |
-| Cache do node-gyp | `%LOCALAPPDATA%\node-gyp\Cache` | arquivos do Node baixados para compilar módulos | fonte oficial do local da cache (59 MB no PC auditado) |
-| Cache de tipos do TypeScript | `%LOCALAPPDATA%\Microsoft\TypeScript\<versão>` | tipos que o editor baixa para JavaScript | fonte (46 MB no PC auditado) |
-| Cache do Composer (PHP) | `%LOCALAPPDATA%\Composer` (só `cache`/`files`) | equivale a `composer clear-cache` | confirmar subpastas |
-| Cache do Deno | `%LOCALAPPDATA%\deno` (`deps`, `gen`) | baixa/compila de novo | confirmar subpastas |
+| Cache de tipos do TypeScript | `%LOCALAPPDATA%\Microsoft\TypeScript\<versão>` | tipos que o editor baixa para JavaScript | fonte oficial do local no Windows (pesquisado em 16/11/2026: só wikis de terceiros); 46 MB no PC auditado |
+| Cache do Deno | `%LOCALAPPDATA%\deno` | baixa/compila de novo | **só pelo comando**: a documentação oferece `deno clean`; depende do tipo de alvo "rodar comando" (ROADMAP) |
 | Outros apps Electron | `Cache`, `Code Cache`, `GPUCache` de Figma, WhatsApp (versão Electron) etc. | mesmo formato de Discord/Slack | conferir caminho de cada um; apps da Microsoft Store ficam em `Packages\...` |
 | Outros caches de shaders | AMD `VkCache`/`GLCache`, NVIDIA `NV_Cache`, Intel `ShaderCache` | o driver recria (provável) | **fonte confiável**: a pesquisa só achou sites de baixa qualidade |
 

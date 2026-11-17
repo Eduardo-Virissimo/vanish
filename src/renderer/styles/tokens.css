@@ -5,11 +5,24 @@
   --text: #F3F3F5;
   --soft: #C9CBD1;
   --muted: #8E9099;
+  /* texto de estado que precisa ser lido ("Precisa de admin", "Vazia"): ≥ 4,5:1 no fundo e na gaveta */
+  --dim: #878992;
+  /* só para o que está desativado de verdade (não precisa ser lido) */
   --faint: #5C5E66;
   --btn: #2A2B30;
   --btn-hover: #34353B;
-  --danger: #E5484D;
-  --danger-hover: #F05257;
+  /* botão de confirmar uma limpeza só de caches: o mesmo cinza, um tom acima do "Cancelar" */
+  --primary: #3A3C44;
+  --primary-hover: #45474F;
+  --primary-text: var(--text);
+  /* branco sobre --danger: 4,95:1 */
+  --danger: #CC3A3F;
+  --danger-hover: #B9343A;
+  --danger-text: #FF9A9D;
+  /* cor da faísca (bar/particles.ts), usada no número ao fim da limpeza */
+  --spark: #FFD9A0;
+  --surface-modal: #202125;
+  --surface-panel: #1F2023;
 
   --sans: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
   --display: "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;

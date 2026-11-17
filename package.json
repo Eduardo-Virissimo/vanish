@@ -1,23 +1,67 @@
 {
   "name": "vanish",
   "productName": "Vanish",
-  "version": "0.4.0",
-  "description": "Limpa arquivos temporÃ¡rios e caches do Windows",
+  "version": "0.5.0",
+  "description": "Limpa arquivos temporários e caches do Windows",
+  "author": "Eduardo",
   "main": "dist/main.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Eduardo-Virissimo/vanish.git"
+  },
   "scripts": {
     "build": "node scripts/build.mjs",
     "typecheck": "tsc --noEmit",
     "test": "node scripts/test.mjs",
     "logo": "node scripts/make-logo.mjs",
     "icon": "electron scripts/render-icon.cjs",
-    "start": "npm run build && electron ."
+    "start": "npm run build && electron .",
+    "dist": "npm run build && electron-builder --win --publish never"
+  },
+  "build": {
+    "appId": "io.github.eduardo-virissimo.vanish",
+    "productName": "Vanish",
+    "copyright": "Copyright © 2026 Eduardo",
+    "directories": {
+      "output": "release",
+      "buildResources": "assets"
+    },
+    "files": [
+      "dist/**/*",
+      "!dist/**/*.map",
+      "package.json"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.png"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "runAfterFinish": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Vanish",
+      "artifactName": "Vanish-Setup.${ext}",
+      "deleteAppDataOnUninstall": false
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "Eduardo-Virissimo",
+      "repo": "vanish",
+      "releaseType": "release"
+    }
   },
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
     "@types/node": "^26.6.6",
     "electron": "^45.3.1",
+    "electron-builder": "26.18.0",
     "esbuild": "^0.28.2",
     "typescript": "^7.0.2"
+  },
+  "dependencies": {
+    "electron-updater": "6.8.11"
   }
 }

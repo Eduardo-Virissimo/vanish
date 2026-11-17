@@ -41,11 +41,44 @@ Status em 12/11/2026. A ordem dentro de cada fase é a prioridade sugerida.
   AMD; cache web da Steam e da Epic), cache do Electron, e caches de Obsidian, Notion e Postman.
 - `*` no meio do nome de uma pasta (`webcache*`).
 
+### v0.5 (em andamento) — Dia a dia
+- **Uma janela só**: abrir de novo traz a janela que já está aberta.
+- **Atalhos**: Ctrl+R / F5 analisa de novo; Ctrl+Enter abre a confirmação (nunca confirma).
+  Menu padrão do Electron removido (ele recarregava a página no Ctrl+R).
+- **Lembra o que foi desmarcado** entre sessões (nunca lembra uma categoria marcada: as arriscadas
+  sempre começam desmarcadas).
+- **Progresso na barra de tarefas** do Windows (análise e limpeza).
+- **Abrir como administrador**: linha embaixo das categorias quando alguma precisa de admin.
+- **Histórico em pixels** na gaveta: total liberado e as últimas 8 semanas.
+- **Instalador de um clique** (`npm run dist`) e **atualização automática** pelas releases do GitHub,
+  publicadas pelo GitHub Actions ao criar uma tag `vX.Y.Z` (docs/RELEASE.md).
+- **Novos caches**: node-gyp e Composer (`files`, `repo`). Deno e TypeScript ficaram de fora
+  (comando próprio / sem fonte), registrado na auditoria.
+
+### v0.4.1 — Revisão de design (impeccable critique, nota 26/40)
+- **Erro nunca vira sucesso**: análise ou limpeza que falha mostra o problema e a saída
+  ("Analisar de novo"), em vez de "Está tudo limpo" ou "0 arquivos apagados".
+- **Diálogo proporcional ao risco**: só caches → "Limpar X?", tom tranquilo e botão cinza;
+  com a Lixeira → "Apagar X?", vermelho e "Entendi". "Feche antes" virou um bloco de etiquetas
+  (campo `closeFirst`); ⚠ só para o que não volta; novo ícone de Relatórios de erro.
+- **Topo**: o número grande é quanto dá para liberar; no fim da limpeza ele sobe até o total
+  liberado, com a cor da faísca. Disco usado e "última limpeza há N dias" viram contexto.
+- **Acessibilidade**: token `--dim` (≥ 4,5:1) para texto de estado, vermelho com 4,95:1, motivo de
+  "Precisa de admin"/"Reinicie antes" alcançável pelo teclado, anúncios só pelo rodapé, anel de
+  foco do ☰ por dentro.
+- **Interface**: checkbox com ✓ de pixels; botão "Limpar" em vidro cinza; símbolo do Vanish no rodapé.
+- **Pixels pelo app**: ☰ cujas linhas acendem nas cores das categorias (hover e ao virar X); histórico subindo pixel a pixel com brilho; ícone de análise em espiral 3×3, número grande pixelando ao mudar, diálogo surgindo em mosaico, borda da gaveta com pixels LED nas cores das categorias, pontos de categoria em LED, pixel piscando quando está tudo limpo.
+- **Gaveta (☰)**: marca fixa no topo, cabeçalho de categoria que gruda ao rolar, resumo "X GB em N pastas", nome da pasta em destaque no caminho, desmarcadas recolhidas, rolagem abaixo do X.
+- **Barra em "LED de vidro"** (`bar/led.ts`): pixels com reflexo, degradê de calor, vidro nos vazios, cantos em degrau e bloom em três camadas.
+- **Barra de pixels mais viva** (`bar/effects.ts`): bloco desmarcado adormece em cinza pixel a pixel e reacende com lampejo; onda de luz no hover; pixels se desfazendo na diagonal atrás da faísca; um pixel caindo na pilha de vez em quando.
+- Detalhes: tamanhos sem quatro dígitos ("1,0 GB"), caminhos completos que quebram só nas barras,
+  cores do rodapé e do diálogo em tokens, sem brilho nos pontos da gaveta.
+
 ## 🔜 Próximo — v0.5: pronto para usar no dia a dia
 
-1. **Instalador `.exe`** com electron-builder (ícone `.ico` gerado a partir do `logo.svg`,
-   atalho no menu Iniciar, desinstalador).
-2. **Botão "Reiniciar como administrador"** quando alguma categoria mostrar "Precisa de admin".
+1. ✅ **Instalador `.exe`** com electron-builder e **atualização automática** pelo GitHub (feito; ver
+   [RELEASE.md](RELEASE.md)). Sem assinatura de código, por decisão (16/11/2026).
+2. ✅ **"Abrir como administrador"** feito (v0.5). Falta:
    Com admin, parar o serviço `wuauserv` antes de limpar o Windows Update e religar depois.
 3. **Fechar os riscos restantes da auditoria**: bloquear Temporários também quando houver
    reinício pendente (ou pular arquivos em `PendingFileRenameOperations`).
@@ -53,16 +86,16 @@ Status em 12/11/2026. A ordem dentro de cada fase é a prioridade sugerida.
    `Delete-DeliveryOptimizationCache`): um tipo de alvo que roda um comando em vez de apagar.
 5. **Teste de interface com cliques reais** (Playwright para Electron): abrir o app, clicar no ☰,
    em "Analisar de novo", marcar/desmarcar, confirmar limpeza em pastas falsas.
-6. **Uma janela só**: abrir o app de novo traz a janela que já está aberta para a frente.
-7. **Confirmar em fonte** os candidatos 🟢 que faltam (node-gyp, TypeScript, outros shaders) e
+6. ✅ **Uma janela só** (feito).
+7. **Confirmar em fonte** os candidatos 🟢 que faltam (TypeScript, outros shaders) e
    incluir ([CLEANUP-CANDIDATES.md](CLEANUP-CANDIDATES.md)).
-8. **Mais caches de desenvolvimento** 🟢: Electron, node-gyp, uv, Composer, Deno.
+8. **Mais caches de desenvolvimento**: node-gyp e Composer já entraram; Deno e uv só com o tipo de alvo "rodar comando" (item 4).
 
 ## 🗓️ Depois — v0.6: mais controle
 
 - **Excluir pastas específicas** pela coluna de pastas (desmarcar uma pasta, não só a categoria),
   lembrando a escolha.
-- **Histórico de limpezas**: quanto foi liberado em cada dia.
+- ✅ **Histórico de limpezas** (gráfico de 8 semanas na gaveta). Falta: ver por dia/mês.
 - **Configurações**: idade mínima dos temporários (hoje 24 h), categorias ligadas por padrão.
 - **Limpeza agendada** (ex.: toda semana), com aviso do Windows mostrando quanto foi liberado.
 

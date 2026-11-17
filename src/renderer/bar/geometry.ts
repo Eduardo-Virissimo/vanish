@@ -9,7 +9,6 @@ export const TOP_ROOM = 96;  // espaço acima para as partículas (igual a --bar
 export const BAR_H = ROWS * PITCH + INSET * 2;
 
 export const BG = '#1B1C1F';
-export const FREE = 'rgba(255,255,255,0.045)'; // quadradinho vazio/limpo
 
 /**
  * Cada coisa é desenhada em duas "passadas":
@@ -29,6 +28,11 @@ export interface Segment {
   lit: number;
   litTarget: number;
   clearing: boolean;
+  /** 1 = marcada (acesa), 0 = desmarcada (adormecida); anda até onTarget pixel a pixel */
+  on: number;
+  onTarget: number;
+  /** quando o hover começou neste bloco, em segundos (onda de luz) */
+  hoverAt: number | null;
 }
 
 /** y do quadradinho da linha `row` */

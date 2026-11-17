@@ -8,6 +8,10 @@
 
 Electron · TypeScript · Windows 10/11
 
+<a href="https://github.com/Eduardo-Virissimo/vanish/releases/latest/download/Vanish-Setup.exe"><img src="https://img.shields.io/badge/Baixar%20para%20Windows-Vanish--Setup.exe-3D8BFF?style=for-the-badge&logo=windows11&logoColor=white" alt="Baixar o Vanish para Windows (Vanish-Setup.exe)" height="40"></a>
+
+<sub>Instala em segundos, sem pedir administrador, e se atualiza sozinho. <a href="https://github.com/Eduardo-Virissimo/vanish/releases">Todas as versões</a></sub>
+
 </div>
 
 ![Tela principal do Vanish: a barra de pixels mostra quanto cada categoria ocupa](docs/screenshots/main.png)
@@ -22,12 +26,15 @@ O Vanish faz o contrário:
 - **Você vê as pastas reais.** O menu ☰ mostra cada pasta encontrada no seu PC, com o tamanho e a
   regra que se aplica; um clique abre no Explorador para conferir.
 - **Confirmação que explica.** Antes de apagar, cada categoria aparece com o que vai acontecer
-  ("Feche os navegadores antes"). O que não volta, como a Lixeira, pede "Entendi".
+  e o que precisa estar fechado ("feche antes: Steam e Epic"). Só caches: confirmação leve. O que
+  não volta, como a Lixeira, fica em vermelho e pede "Entendi".
 - **Travas de segurança.** Nunca segue atalhos ou junções para fora das pastas, pula arquivos em
   uso, mantém temporários recentes e bloqueia o Windows Update quando há atualização esperando
   reiniciar.
 
-![Menu com as pastas reais que serão limpas](docs/screenshots/menu.png)
+![Menu ☰ com o histórico em pixels e as pastas reais que serão limpas (nome de usuário censurado)](docs/screenshots/menu.png)
+
+![Confirmação antes de limpar: o que cada categoria perde e o que fechar antes](docs/screenshots/confirm.png)
 
 ## O que ele limpa
 
@@ -36,7 +43,7 @@ O Vanish faz o contrário:
 | **Temporários** | `%TEMP%` e `C:\Windows\Temp`, só arquivos com mais de 24 h | sim |
 | **Navegadores** | cache do Chrome, Edge, Brave, Opera e Firefox (senhas, histórico e logins ficam) | sim |
 | **Cache de apps** | Discord, VS Code, Slack, Teams, Spotify, Notion, Obsidian, Postman | sim |
-| **Desenvolvimento** | cache do npm, Yarn, pip, NuGet, Go e Electron | sim |
+| **Desenvolvimento** | cache do npm, Yarn, pip, NuGet, Go, Electron, node-gyp e Composer | sim |
 | **Jogos e gráficos** | shaders do DirectX, NVIDIA e AMD; cache web da Steam e da Epic | sim |
 | **Miniaturas** | `thumbcache_*.db` e `iconcache_*.db` do Explorador | sim |
 | **Relatórios de erro** | relatórios e despejos de travamentos antigos | sim |
@@ -45,7 +52,22 @@ O Vanish faz o contrário:
 
 O que ficou de fora de propósito (e por quê) está em [candidatos](docs/CLEANUP-CANDIDATES.md).
 
-## Começando
+## Instalar
+
+Clique em **Baixar para Windows** no topo (ou baixe o **`Vanish-Setup.exe`** da [última release](https://github.com/Eduardo-Virissimo/vanish/releases/latest))
+e abra. Ele instala em segundos, só para o seu usuário (sem pedir administrador), e já abre o app.
+
+- **Atualiza sozinho:** o Vanish confere o GitHub ao abrir, baixa a versão nova em segundo plano e
+  instala quando você fecha. Para instalar na hora, clique em **Atualizar para x.y.z** no topo.
+- O instalador **ainda não é assinado**. Com o "Controle Inteligente de Aplicativos" do Windows 11
+  ligado, ele é bloqueado; sem ele, o Windows mostra "O Windows protegeu o computador": clique em
+  **Mais informações → Executar assim mesmo**. Para usar com o Controle Inteligente ligado é preciso
+  desligá-lo (Segurança do Windows → Controle de aplicativos e navegador).
+- Para desinstalar: Configurações do Windows → Aplicativos → Vanish.
+
+Como publicar uma versão nova: [docs/RELEASE.md](docs/RELEASE.md).
+
+## Desenvolver
 
 Requisitos: **Windows 10 ou 11** e **Node.js 22+**.
 
@@ -56,10 +78,11 @@ npm start       # compila e abre o app
 
 - O app analisa sozinho ao abrir. Marque ou desmarque categorias, confira as pastas no ☰ e clique
   em **Limpar**.
-- Algumas pastas (`C:\Windows\Temp`, Windows Update, parte dos relatórios de erro) só podem ser
-  apagadas abrindo o terminal **como administrador** antes do `npm start`.
-- Feche o app antes de rodar `npm start` de novo: uma janela antiga aberta continua com a versão
-  antiga.
+- Algumas pastas (`C:\Windows\Temp`, Windows Update, parte dos relatórios de erro) precisam de
+  administrador: quando aparecer "precisa de administrador", clique em **Abrir como administrador**.
+- Atalhos: **Ctrl+R** analisa de novo; **Ctrl+Enter** abre a confirmação.
+- Feche o app antes de rodar `npm start` de novo: o Vanish só permite uma janela, então a cópia nova
+  fecharia sozinha e você continuaria vendo a versão antiga.
 
 ### Scripts
 
@@ -69,6 +92,7 @@ npm start       # compila e abre o app
 | `npm test` | testes: regras de segurança de todas as categorias e o motor de limpeza em pastas falsas |
 | `npm run typecheck` | confere os tipos (TypeScript estrito) |
 | `npm run build` | só compila para `dist/` |
+| `npm run dist` | gera o instalador em `release/` (sem publicar; ver [RELEASE.md](docs/RELEASE.md)) |
 | `npm run logo` / `npm run icon` | regeneram o símbolo (`assets/*.svg`) e o ícone (`assets/icon.png`) |
 
 ## Como é feito

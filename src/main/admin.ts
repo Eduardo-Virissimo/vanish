@@ -2,7 +2,8 @@
 // O relançamento sempre usa o executável do próprio app (nunca um caminho vindo da tela).
 import { app } from 'electron';
 import { execFile } from 'node:child_process';
-import { isElevatedGroups } from './integrity';
+import { currentSid } from '../cleaner/system';
+import { isElevatedGroups, launchFlag } from './integrity';
 
 const run = (file: string, args: string[]) =>
   new Promise<string>((resolve, reject) => {
@@ -26,6 +27,9 @@ const ps = (s: string) => `'${s.replace(/'/g, "''")}'`;
 export async function relaunchAsAdmin(): Promise<boolean> {
   // em desenvolvimento o executável é o electron.exe e precisa da pasta do app como argumento
   const args = app.isPackaged ? [] : [app.getAppPath()];
+  // quem está pedindo: a cópia elevada avisa se o UAC a abriu em outra conta (integrity.ts)
+  const sid = await currentSid().catch(() => null);
+  if (sid) args.push(launchFlag(sid));
   const argList = args.length ? ` -ArgumentList ${args.map((a) => ps(`"${a}"`)).join(',')}` : '';
   const command = `Start-Process -FilePath ${ps(process.execPath)}${argList} -Verb RunAs`;
 

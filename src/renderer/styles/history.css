@@ -47,11 +47,11 @@
 }
 .hist-col i.on {
   /* --row 0 (embaixo) → 9 (em cima): azul do símbolo indo para o ciano */
-  background: color-mix(in srgb, #3D8BFF, #68CCFF calc(var(--row) * 10%));
+  background: color-mix(in srgb, var(--brand-blue), var(--brand-cyan) calc(var(--row) * 10%));
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.35),
     inset 0 -1px 0 rgba(0, 0, 0, 0.2),
-    0 0 6px color-mix(in srgb, #3D8BFF 35%, transparent);
+    0 0 6px color-mix(in srgb, var(--brand-blue) 35%, transparent);
 }
 /* a semana atual tem um traço embaixo, para achar "agora" no gráfico */
 .hist-col.is-now { position: relative; }
@@ -86,7 +86,7 @@
 .hist-col i.on.top {
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.5),
-    0 0 10px color-mix(in srgb, #68CCFF 70%, transparent);
+    0 0 10px color-mix(in srgb, var(--brand-cyan) 70%, transparent);
 }
 @keyframes hist-in {
   from { opacity: 0; transform: scale(0); }

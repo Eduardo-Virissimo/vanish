@@ -1,13 +1,16 @@
 // Responde aos pedidos da tela. Os canais e formatos estão em shared/ipc.ts.
 import { BrowserWindow, ipcMain, shell, type IpcMainInvokeEvent, type WebContents } from 'electron';
 import { statfs } from 'node:fs/promises';
-import { homedir } from 'node:os';
+import { homedir, userInfo } from 'node:os';
 import { categories } from '../cleaner/categories';
 import { cleanCategory, scanCategory } from '../cleaner/engine';
+import { currentSid } from '../cleaner/system';
 import type { EventChannel, EventMap, InvokeChannel, InvokeMap } from '../shared/ipc';
 import type { CleanResult, ScanResult } from '../shared/types';
 import { BG } from './window';
 import { isAdmin, relaunchAsAdmin } from './admin';
+import { isOtherAccount, launcherSid } from './integrity';
+import { logError } from './log';
 import { taskbar } from './taskbar';
 import { installNow } from './updater';
 import { exclusive, latest, throttle } from './timing';
@@ -17,7 +20,18 @@ type Handler<K extends InvokeChannel> = (
   ...args: Parameters<InvokeMap[K]>
 ) => ReturnType<InvokeMap[K]> | Promise<ReturnType<InvokeMap[K]>>;
 
-const handle = <K extends InvokeChannel>(channel: K, handler: Handler<K>) => ipcMain.handle(channel, handler);
+/**
+ * Só a tela do próprio Vanish (arquivo local, quadro principal) pode pedir algo. A navegação já é
+ * bloqueada em window.ts; isto é a segunda trava, recomendada pelo guia de segurança do Electron.
+ */
+const fromApp = (event: IpcMainInvokeEvent) =>
+  event.senderFrame !== null && event.senderFrame === event.sender.mainFrame && event.senderFrame.url.startsWith('file://');
+
+const handle = <K extends InvokeChannel>(channel: K, handler: Handler<K>) =>
+  ipcMain.handle(channel, (event, ...args) => {
+    if (!fromApp(event)) throw new Error('Pedido de origem desconhecida');
+    return handler(event, ...(args as Parameters<InvokeMap[K]>));
+  });
 
 const emitter = (wc: WebContents) => <K extends EventChannel>(channel: K, data: EventMap[K]) => {
   if (!wc.isDestroyed()) wc.send(channel, data);
@@ -37,6 +51,10 @@ export function registerIpc(): void {
   handle('app:init', async () => ({
     home: homedir(),
     isAdmin: await isAdmin(),
+    // reaberto como administrador pelo UAC em outra conta: a tela avisa de quem é o que será limpo
+    otherAccount: isOtherAccount(launcherSid(process.argv), await currentSid().catch(() => undefined))
+      ? userInfo().username
+      : undefined,
     // só o que a tela precisa: os caminhos ficam no processo principal
     categories: categories.map(({ id, name, color, icon, hint, optIn, warning, closeFirst }) => ({
       id, name, color, icon, hint, warning, closeFirst, defaultSelected: !optIn,
@@ -49,14 +67,14 @@ export function registerIpc(): void {
     return { drive: drive.slice(0, 2), total: s.blocks * s.bsize, free: s.bavail * s.bsize };
   });
 
-  handle('scan', (event) => exclusive(async () => {
+  handle('scan', (event) => exclusive('scan', async () => {
     const emit = emitter(event.sender);
     const progress = taskbar(event.sender);
     progress.busy();
     const onPath = latest((p: string) => emit('progress:path', p), 60);
     const results = await Promise.all(categories.map(async (category) => {
       const result = { id: category.id, ...(await scanCategory(category, onPath).catch((error) => {
-        console.warn(`Análise de ${category.id}:`, error);
+        logError(`análise de ${category.id}`, error);
         return FAILED_SCAN;
       })) };
       emit('scan:category', result);
@@ -87,7 +105,7 @@ export function registerIpc(): void {
     win.setTitleBarOverlay({ color: BG, symbolColor: '#8E9099' });
   });
 
-  handle('clean', (event, ids) => exclusive(async () => {
+  handle('clean', (event, ids) => exclusive('clean', async () => {
     const emit = emitter(event.sender);
     const onPath = latest((p: string) => emit('progress:path', p), 60);
     // Só aceita ids que existem na lista fechada de categorias
@@ -102,7 +120,7 @@ export function registerIpc(): void {
       const onFreed = throttle((freed: number) => emit('clean:progress', { id: category.id, freed }), 80);
       const result = await cleanCategory(category, { onPath, onFreed }).catch((error) => {
         // o que já foi apagado antes do erro não volta, mas a tela precisa saber que parou
-        console.warn(`Limpeza de ${category.id}:`, error);
+        logError(`limpeza de ${category.id}`, error);
         total.failed?.push(category.name);
         return EMPTY_CLEAN;
       });

@@ -1,4 +1,5 @@
-import { BrowserWindow } from 'electron';
+import { BrowserWindow, dialog } from 'electron';
+import { currentTask } from './timing';
 import { join } from 'node:path';
 
 const WINDOW_MIN_WIDTH = 820;
@@ -43,8 +44,29 @@ export function createWindow(): BrowserWindow {
       if (!win.isDestroyed()) win.setAlwaysOnTop(false);
     }, 600);
   });
+  // segurança (guia do Electron): nada de janelas novas, navegação, <webview> nem permissões
+  // (câmera, notificações, localização...). O Vanish não precisa de nenhuma delas.
   win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
   win.webContents.on('will-navigate', (e) => e.preventDefault());
+  win.webContents.on('will-attach-webview', (e) => e.preventDefault());
+  win.webContents.session.setPermissionRequestHandler((_wc, _permission, allow) => allow(false));
+  win.webContents.session.setPermissionCheckHandler(() => false);
+
+  // fechar no meio da limpeza para tudo: pergunta antes (na análise não há o que perder)
+  win.on('close', (e) => {
+    if (currentTask() !== 'clean') return;
+    const choice = dialog.showMessageBoxSync(win, {
+      type: 'warning',
+      title: 'Vanish',
+      message: 'A limpeza ainda está em andamento.',
+      detail: 'Se fechar agora, ela para no meio. O que já foi apagado não volta; o resto fica para a próxima limpeza.',
+      buttons: ['Continuar limpando', 'Fechar'],
+      defaultId: 0,
+      cancelId: 0,
+      noLink: true,
+    });
+    if (choice === 0) e.preventDefault();
+  });
   win.loadFile(join(__dirname, 'renderer', 'index.html'));
   return win;
 }

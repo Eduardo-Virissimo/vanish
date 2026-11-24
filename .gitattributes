@@ -1,0 +1,9 @@
+# Fim de linha: o repositório guarda texto sempre em LF, seja qual for a configuração do Git de
+# quem clona (no Windows, a cópia de trabalho pode ficar em CRLF; o commit volta para LF).
+* text=auto
+
+# binários: nunca converter
+*.png binary
+*.ico binary
+*.ttf binary
+*.exe binary

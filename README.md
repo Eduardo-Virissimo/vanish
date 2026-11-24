@@ -41,7 +41,8 @@ palavra: dá para conferir.
   ([Actions](.github/workflows/release.yml)) a partir deste código público, não no meu PC.
 - **Sem coleta de dados, sem propaganda.** O app só se conecta à internet para procurar versões
   novas nas [releases deste repositório](https://github.com/Eduardo-Virissimo/vanish/releases).
-  Nada sobre você ou seu PC é enviado.
+  Nada sobre você ou seu PC é enviado. Erros ficam num registro só no seu PC
+  (`%APPDATA%\Vanish\logs\vanish.log`), para você mandar se quiser relatar um problema.
 - **Lista fechada e auditada.** Cada pasta que pode ser limpa tem fonte e justificativa na
   [auditoria de segurança](docs/SAFETY-AUDIT.md). Sem fonte confiável, não entra.
 - **Travas no próprio app**, checadas na análise e de novo na hora de apagar:
@@ -51,7 +52,10 @@ palavra: dá para conferir.
     estiver apontando para o disco inteiro, a categoria é bloqueada em vez de apagar tudo);
   - temporários só com mais de 24 h, pela data de criação (instaladores rodando não são afetados);
   - arquivos em uso são pulados; Windows Update fica bloqueado com reinício pendente;
-  - a tela não tem acesso ao disco e só consegue pedir categorias conhecidas.
+  - arquivos que um instalador agendou para o próximo reinício nunca são apagados;
+  - se o "Abrir como administrador" cair na conta de outra pessoa, o app avisa antes;
+  - a tela não tem acesso ao disco e só consegue pedir categorias conhecidas; pedidos que não
+    vêm da própria tela do app são recusados, e permissões como câmera ou notificações são negadas.
 - **Testes automáticos em toda mudança** ([CI](.github/workflows/ci.yml)): as regras de segurança
   de todas as categorias, o motor de limpeza rodando em pastas falsas (nunca no PC de verdade) e
   casos como `TEMP=C:\`. Uma versão só é publicada se tudo passar.

@@ -116,8 +116,8 @@ export function drawSweep(ctx: CanvasRenderingContext2D, pass: Pass, x: number) 
 /** Bloom: [raio do desfoque em px, intensidade] — um véu bem largo, um halo e um brilho justo */
 const BLOOM_PASSES: Array<[blur: number, strength: number]> = [[30, 0.4], [14, 0.95], [4, 0.8]];
 
-/** Borra a camada de brilho e soma por cima da imagem (luz somada = bloom) */
 /**
+ * Borra a camada de brilho e soma por cima da imagem (luz somada = bloom).
  * O desfoque é a parte cara do quadro. Ele é feito em meia resolução (um quarto dos pixels) num
  * canvas auxiliar e depois ampliado: como é luz borrada, a diferença não aparece.
  */

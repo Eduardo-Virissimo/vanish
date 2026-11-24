@@ -83,7 +83,10 @@ Não precisa mexer em mais nada: a tela recebe nome, cor, ícone e aviso pelo IP
 | pastas proibidas | raiz do disco, `C:\Windows`, `System32`, `WinSxS`, `Installer`, Documentos, Downloads, AppData inteira... |
 | dados do usuário | caminho passando por `Cookies`, `Login Data`, `IndexedDB`, `Service Worker`, `Storage`, `packages`...; ou terminando num contêiner de perfis (`User Data`, `Profiles`, `Partitions`) |
 | auditoria | categoria sem seção `### <nome>` em `docs/SAFETY-AUDIT.md` |
-| motor | soma de tamanhos, limpeza, junção não seguida, idade mínima, filtro por nome, `*` no nome |
+| motor | soma de tamanhos, limpeza, junção não seguida, idade mínima (pela data de criação também), filtro por nome, `*` no nome, pasta fora do lugar bloqueando a categoria |
+| lugar seguro (`safety.test.ts`) | `TEMP`/`LOCALAPPDATA`/`APPDATA` apontando para a raiz do disco, pasta do usuário ou do sistema |
+| reinício pendente (`pending.test.ts`) | leitura de `PendingFileRenameOperations` e o motor pulando esses arquivos |
+| Windows (`system.test.ts`) | nível de administrador, SID, discos locais, troca de conta pelo UAC, arquivos `$I` da Lixeira |
 
 As regras moram em `src/cleaner/safety.ts` e valem também com o app rodando: o motor bloqueia
 qualquer pasta que não passe nelas. Se uma regra precisar mudar (ex.: liberar uma área nova), mude

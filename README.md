@@ -16,7 +16,52 @@ Electron · TypeScript · Windows 10/11
 
 ![Tela principal do Vanish: a barra de pixels mostra quanto cada categoria ocupa](docs/screenshots/main.png)
 
-## Por que o Vanish
+## Por que eu fiz
+
+Eu cansei de ver o disco enchendo sem saber **onde** estavam os arquivos que pesavam no meu PC.
+Os limpadores que eu achava ou não mostravam nada (só um botão "limpar" e torcer para não apagar
+algo importante), ou vinham cheios de propaganda, "otimizador de registro" e coisas que eu não
+confiava. Então fiz o meu: um app que mostra exatamente o que ocupa espaço, de onde vem, e só
+apaga o que os programas recriam sozinhos.
+
+## Feito com IA
+
+O Vanish foi feito por mim com a ajuda de IA (**Claude**, da Anthropic), que escreveu boa parte do
+código sob a minha direção. A IA não trabalha solta: o projeto tem regras escritas que ela (e
+qualquer pessoa) precisa seguir antes de mexer em qualquer coisa ([AGENTS.md](AGENTS.md)), e nada
+entra sem passar pelas verificações abaixo. As decisões de produto, visual e o que pode ou não ser
+apagado são minhas.
+
+## Seguro e sem vírus
+
+Um limpador apaga arquivos, então segurança vem antes de tudo. Você não precisa acreditar na minha
+palavra: dá para conferir.
+
+- **Código aberto.** Todo o código está aqui. O instalador é gerado pelo próprio GitHub
+  ([Actions](.github/workflows/release.yml)) a partir deste código público, não no meu PC.
+- **Sem coleta de dados, sem propaganda.** O app só se conecta à internet para procurar versões
+  novas nas [releases deste repositório](https://github.com/Eduardo-Virissimo/vanish/releases).
+  Nada sobre você ou seu PC é enviado.
+- **Lista fechada e auditada.** Cada pasta que pode ser limpa tem fonte e justificativa na
+  [auditoria de segurança](docs/SAFETY-AUDIT.md). Sem fonte confiável, não entra.
+- **Travas no próprio app**, checadas na análise e de novo na hora de apagar:
+  - só apaga o conteúdo de pastas da lista, nunca a pasta em si, e nunca segue atalhos ou junções
+    para fora dela;
+  - confere no seu PC se cada pasta está mesmo no lugar esperado (se uma variável como `TEMP`
+    estiver apontando para o disco inteiro, a categoria é bloqueada em vez de apagar tudo);
+  - temporários só com mais de 24 h, pela data de criação (instaladores rodando não são afetados);
+  - arquivos em uso são pulados; Windows Update fica bloqueado com reinício pendente;
+  - a tela não tem acesso ao disco e só consegue pedir categorias conhecidas.
+- **Testes automáticos em toda mudança** ([CI](.github/workflows/ci.yml)): as regras de segurança
+  de todas as categorias, o motor de limpeza rodando em pastas falsas (nunca no PC de verdade) e
+  casos como `TEMP=C:\`. Uma versão só é publicada se tudo passar.
+- **TypeScript estrito**, revisão de cada mudança e documentação de como o app funciona
+  ([arquitetura](docs/ARCHITECTURE.md)).
+
+O instalador ainda **não é assinado** digitalmente (certificado é pago), por isso o Windows pode
+avisar na primeira vez; veja [Instalar](#instalar).
+
+## O que o Vanish faz diferente
 
 Limpadores costumam ser uma caixa-preta: você clica e espera que não tenham apagado nada importante.
 O Vanish faz o contrário:

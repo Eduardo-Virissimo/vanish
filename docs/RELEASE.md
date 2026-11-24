@@ -17,7 +17,11 @@ e instala quando é fechado (ou na hora, pelo botão "Atualizar para x.y.z" no t
    git push origin main v0.5.1
    ```
 4. Pronto. O GitHub Actions ([`.github/workflows/release.yml`](../.github/workflows/release.yml))
-   roda typecheck e testes, gera o instalador e cria a release com três arquivos:
+   roda typecheck e testes, cria a release como **rascunho** (com notas geradas dos commits), gera
+   o instalador, envia os arquivos e só então publica, depois de conferir que os três estão lá e
+   que existe uma única release com essa tag. (Criar a release antes evita um problema da v0.5.1:
+   o electron-builder enviava os arquivos em paralelo e criou **duas** releases com a mesma tag,
+   e o link de download do README dava 404.) A release tem três arquivos:
    - `Vanish-Setup.exe`: o instalador (é o que as pessoas baixam). O nome não muda entre versões,
      então o link `releases/latest/download/Vanish-Setup.exe` (botão do README) sempre baixa a última;
    - `Vanish-Setup.exe.blockmap`: deixa a atualização baixar só o que mudou;

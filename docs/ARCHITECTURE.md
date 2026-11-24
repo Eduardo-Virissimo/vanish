@@ -220,8 +220,9 @@ Regras que mantêm isso (não quebrar):
 - `.github/workflows/ci.yml`: em todo push e pull request na `main`, roda typecheck, testes e
   build numa máquina Windows do GitHub.
 - `.github/workflows/release.yml`: ao receber uma tag `vX.Y.Z`, o GitHub confere que a tag bate
-  com o `package.json`, roda typecheck e testes, gera o instalador e publica a release com o
-  `latest.yml` e o `.blockmap`.
+  com o `package.json`, roda typecheck e testes, cria a release como rascunho (`gh release create`),
+  o electron-builder envia o instalador, o `latest.yml` e o `.blockmap` para ela
+  (`publish.releaseType: "draft"`), e um último passo confere os arquivos e publica.
 - `main/updater.ts` (só no app instalado): procura versão nova 5 s depois de abrir e a cada 6 h,
   baixa em segundo plano, avisa a tela (`update:status`) e instala ao fechar. O botão da tela
   (`update:install`) reinicia na hora, mas nunca no meio de uma análise ou limpeza.

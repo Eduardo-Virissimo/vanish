@@ -9,6 +9,7 @@ mudar código. A documentação fica em [`docs/`](docs/README.md):
 - [docs/CLEANUP-CANDIDATES.md](docs/CLEANUP-CANDIDATES.md): alvos pesquisados e proibidos
 - [docs/DESIGN.md](docs/DESIGN.md): visual
 - [docs/ROADMAP.md](docs/ROADMAP.md): o que vem depois
+- [docs/GIT.md](docs/GIT.md): **branches (`dev`), commits e versões** (obrigatório)
 - [docs/RELEASE.md](docs/RELEASE.md): instalador e publicação de versões (atualização automática)
 
 ## Comandos
@@ -78,6 +79,22 @@ Este app **apaga arquivos**. Um erro aqui destrói dados do usuário.
 - Ao criar algo novo (canal, pasta, script, animação), atualizar `docs/ARCHITECTURE.md` e, se for
   visual, `docs/DESIGN.md`. Pasta limpa nova → `docs/SAFETY-AUDIT.md`.
 - Ao terminar uma entrega, atualizar `docs/ROADMAP.md`.
+
+## Git (obrigatório) — detalhes em [docs/GIT.md](docs/GIT.md)
+
+- **Nunca commitar direto em `main` nem em `dev`.** `main` = só versões publicadas (com tag);
+  `dev` = integração. Todo trabalho começa numa branch saindo da `dev` atualizada:
+  `feat/…`, `fix/…`, `docs/…`, `test/…`, `refactor/…`, `chore/…`, `ci/…` (minúsculas, com hífen).
+- **Commits no formato Conventional Commits, em português**: `tipo(escopo): descrição no
+  imperativo`, ex.: `fix(lixeira): contar cada item uma vez`. Tipos: `feat`, `fix`, `perf`,
+  `refactor`, `test`, `docs`, `style`, `build`, `ci`, `chore`. Quebra de compatibilidade: `!` e
+  rodapé `BREAKING CHANGE:`.
+- Cada commit passa em `npm run typecheck` e `npm test`. Um assunto por branch e por commit.
+- Commits no nome do autor do repositório, **sem** `Co-Authored-By` de IA.
+- Branch pronta → PR para a `dev` (ou `merge --no-ff` local). Versão nova → `dev` para `main`,
+  tag `vX.Y.Z` **na `main`**. Bug sério em versão publicada → `hotfix/…` saindo da `main`, volta
+  para `main` e `dev`.
+- **Push, tag, merge na `main` e qualquer coisa que publique** só com o pedido do autor.
 
 ## Como testar
 

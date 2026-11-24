@@ -176,6 +176,7 @@ arquivo da categoria, registre na auditoria e rode `npm test`. O teste **recusa*
 | [CLEANUP-CANDIDATES.md](docs/CLEANUP-CANDIDATES.md) | outras coisas que podem (ou não devem) ser limpas |
 | [DESIGN.md](docs/DESIGN.md) | identidade visual, animações, marca e textos |
 | [ROADMAP.md](docs/ROADMAP.md) | o que já foi feito e o que vem depois |
+| [GIT.md](docs/GIT.md) | branches, formato dos commits e como sai uma versão |
 | [AGENTS.md](AGENTS.md) | regras para quem (pessoa ou IA) for mexer no código |
 
 ## Licença

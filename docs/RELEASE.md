@@ -7,14 +7,17 @@ e instala quando é fechado (ou na hora, pelo botão "Atualizar para x.y.z" no t
 
 ## Passo a passo
 
-1. Suba a versão no `package.json` (`"version": "0.5.1"`). Use [versionamento semântico](https://semver.org/lang/pt-BR/):
+O caminho das branches (`dev` → `main`) e o formato dos commits estão em [GIT.md](GIT.md).
+
+1. Numa branch `chore/release-X.Y.Z` saindo da `dev`, suba a versão
+   (`npm version 0.5.2 --no-git-tag-version`). Use [versionamento semântico](https://semver.org/lang/pt-BR/):
    correção → último número; recurso novo → do meio.
-2. Rode `npm run typecheck` e `npm test`.
-3. Faça commit e crie a tag com **a mesma versão**, com `v` na frente:
+2. Rode `npm run typecheck` e `npm test`, faça o commit `chore(release): 0.5.2` e junte na `dev`.
+3. Junte a `dev` na `main` e crie a tag **na `main`** com **a mesma versão**, com `v` na frente:
    ```bash
-   git commit -am "Vanish 0.5.1"
-   git tag v0.5.1
-   git push origin main v0.5.1
+   git switch main && git merge --no-ff dev
+   git tag v0.5.2
+   git push origin main v0.5.2
    ```
 4. Pronto. O GitHub Actions ([`.github/workflows/release.yml`](../.github/workflows/release.yml))
    roda typecheck e testes, cria a release como **rascunho** (com notas geradas dos commits), gera

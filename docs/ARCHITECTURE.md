@@ -37,6 +37,7 @@ cleaner/
 │   │   │   └── temp · browsers · apps · dev · games · thumbs · errors · update · trash (.ts)
 │   │   ├── paths.ts        pastas do Windows (%TEMP%, %LOCALAPPDATA%…) e atalhos para caches
 │   │   ├── types.ts        tipos Target (uma pasta), Category, Guard e defineCategory()
+│   │   ├── pending-renames.ts  arquivos que o Windows troca no próximo reinício: nunca apagados
 │   │   ├── guards.ts       travas checadas antes de analisar/limpar (ex.: reinício pendente)
 │   │   ├── safety.ts       onde se pode apagar (áreas, pastas proibidas, dados do usuário); vale nos testes E ao rodar
 │   │   ├── fs-walk.ts      percorre pastas sem seguir links; resolve "*" nos caminhos

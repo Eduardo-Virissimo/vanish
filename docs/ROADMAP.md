@@ -108,8 +108,8 @@ pelo workflow corrigido (release criada antes do envio dos arquivos) e pelo flux
    [RELEASE.md](RELEASE.md)). Sem assinatura de código, por decisão (16/11/2026).
 2. ✅ **"Abrir como administrador"** feito (v0.5). Falta:
    Com admin, parar o serviço `wuauserv` antes de limpar o Windows Update e religar depois.
-3. **Fechar os riscos restantes da auditoria**: bloquear Temporários também quando houver
-   reinício pendente (ou pular arquivos em `PendingFileRenameOperations`).
+3. ✅ **Fechar os riscos restantes da auditoria**: arquivos em `PendingFileRenameOperations` são
+   pulados em todas as categorias (`cleaner/pending-renames.ts`).
 4. **Limpar com o comando do próprio programa** (`uv cache clean`, `pnpm store prune`,
    `Delete-DeliveryOptimizationCache`): um tipo de alvo que roda um comando em vez de apagar.
 5. **Teste de interface com cliques reais** (Playwright para Electron): abrir o app, clicar no ☰,

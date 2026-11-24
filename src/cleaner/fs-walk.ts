@@ -81,6 +81,8 @@ export interface WalkContext extends Omit<Target, 'path'> {
   dirs?: string[];
   /** fica true se a pasta raiz não pôde ser lida por falta de permissão */
   denied?: boolean;
+  /** caminhos (em minúsculas) que nunca são contados nem apagados (ex.: pending-renames.ts) */
+  skip?: ReadonlySet<string>;
 }
 
 export async function walk(dir: string, ctx: WalkContext, isRoot = true): Promise<void> {
@@ -103,6 +105,7 @@ export async function walk(dir: string, ctx: WalkContext, isRoot = true): Promis
       return;
     }
     if (!entry.isFile() || (ctx.match && !ctx.match.test(entry.name))) return;
+    if (ctx.skip?.has(full.toLowerCase())) return;
 
     const st = await limit(() => lstat(full)).catch(() => null);
     if (!st || (ctx.minAgeMs && ageMs(st) < ctx.minAgeMs)) return;

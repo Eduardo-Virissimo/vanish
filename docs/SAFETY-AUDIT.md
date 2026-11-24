@@ -70,8 +70,11 @@ o que o app faz para evitar. Feita em 12/11/2026 e ampliada em 13/11/2026, sobre
   um zip ou instalador mantém a data de modificação original dos arquivos (ex.: 2023), mas a data
   de criação é a da extração. Antes só a modificação era olhada, e um instalador extraído minutos
   antes podia ter arquivos apagados no meio da instalação.
-- **Risco residual (baixo):** um instalador que pediu para terminar algo "na próxima
-  reinicialização" pode apontar para um arquivo em Temp com mais de 24 h. Ver ideia no fim.
+- **Arquivos agendados para o próximo reinício ficam** (desde 23/11/2026,
+  `src/cleaner/pending-renames.ts`). Um instalador que pediu para trocar ou apagar algo "na próxima
+  reinicialização" registra os caminhos em `PendingFileRenameOperations` (é o que o
+  `MoveFileEx` com `MOVEFILE_DELAY_UNTIL_REBOOT` faz, segundo a documentação da Microsoft). O motor
+  lê essa lista e nunca conta nem apaga esses arquivos, em **qualquer** categoria.
 
 ### Navegadores 🟢
 Para Chrome, Edge e Brave (cada perfil): `Cache`, `Code Cache`, `GPUCache`, mais `ShaderCache` e
@@ -162,7 +165,6 @@ entrar em subpastas). É a opção "Miniaturas" da Limpeza de Disco do Windows.
 
 | Risco | Chance | Ideia de proteção |
 |---|---|---|
-| Arquivo em Temp com mais de 24 h ainda necessário para um instalador terminar após reiniciar | baixa | também bloquear Temp quando houver reinicialização pendente, ou ler `PendingFileRenameOperations` e pular esses arquivos |
 | Usuário com dump de travamento que um suporte pediu | baixa | mostrar data dos relatórios na coluna de pastas |
 | Pasta de cache de um app mudar de função numa atualização futura do app | baixa | rever esta auditoria a cada versão grande; a coluna de pastas deixa o usuário conferir |
 

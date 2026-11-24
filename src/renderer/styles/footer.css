@@ -42,7 +42,7 @@
 .btn:disabled { color: var(--faint); cursor: default; }
 
 /* Botão de confirmação ("Apagar 9,4 GB") */
-.btn.danger { background: var(--danger); color: #fff; }
+.btn.danger { background: var(--danger); color: var(--on-danger); }
 
 /* Confirmar uma limpeza só de caches: cinza um tom acima do "Cancelar", sem o vermelho de "não volta" */
 .btn.primary { background: var(--primary); color: var(--primary-text); }

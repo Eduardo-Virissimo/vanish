@@ -21,6 +21,13 @@
   --danger-text: #FF9A9D;
   /* cor da faísca (bar/particles.ts), usada no número ao fim da limpeza */
   --spark: #FFD9A0;
+  /* cores do símbolo do Vanish (azul → ciano): histórico da gaveta e o LED de "Atualizar" */
+  --brand-blue: #3D8BFF;
+  --brand-cyan: #68CCFF;
+  /* texto sobre --danger (4,95:1) */
+  --on-danger: #FFFFFF;
+  /* fundo da tela de abertura (igual a SPLASH_BG em main/window.ts) */
+  --splash-bg: #000000;
   --surface-modal: #202125;
   --surface-panel: #1F2023;
 
@@ -30,7 +37,7 @@
   /* fonte da marca: só para o nome do app */
   --brand: "Sora", var(--display);
 
-  /* espaço acima da barra para as partículas (igual a TOP_ROOM em bar/paint.ts) */
+  /* espaço acima da barra para as partículas (igual a TOP_ROOM em bar/geometry.ts) */
   --bar-top-room: 96px;
   /* largura da coluna de pastas */
   --panel-w: 420px;

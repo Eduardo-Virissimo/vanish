@@ -81,7 +81,9 @@ Segurança primeiro, depois bugs, depois produto e mais lugares para limpar.
 **Versões publicadas nesta fase:** 0.5.1 saiu com o instalador dividido em duas releases com a
 mesma tag (o link de download dava 404) e foi retirada. **0.5.2** tem o mesmo conteúdo, publicada
 pelo workflow corrigido (release criada antes do envio dos arquivos) e pelo fluxo `dev` → `main`
-([GIT.md](GIT.md)).
+([GIT.md](GIT.md)). **0.6.0**: a revisão geral (item 10: Lixeira só em discos locais, arquivos
+agendados para o reinício protegidos, travas do Electron, aviso de conta trocada pelo UAC, pergunta
+ao fechar no meio da limpeza, registro de erros) e a seção "Desinstalar" do README.
 
 1. ✅ **Conferir as pastas no PC do usuário** (`src/cleaner/safety.ts`): `TEMP=C:\` ou
    `LOCALAPPDATA` estranho bloqueiam a categoria em vez de apagar o disco. As regras dos testes e do

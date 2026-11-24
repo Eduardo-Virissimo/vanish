@@ -8,6 +8,7 @@
 | [CLEANUP-CANDIDATES.md](CLEANUP-CANDIDATES.md) | pesquisa de outras coisas que podem (ou não devem) ser limpas |
 | [DESIGN.md](DESIGN.md) | identidade visual: cores, fontes, componentes, animações, logo, textos |
 | [ROADMAP.md](ROADMAP.md) | o que já foi feito e o que vem depois |
+| [GIT.md](GIT.md) | branches (`main`, `dev`, `feat/…`), formato dos commits, versões e hotfix |
 | [RELEASE.md](RELEASE.md) | como gerar o instalador e publicar uma versão nova (atualização automática) |
 
 `screenshots/`: prints do app usados no README. `reference/`: imagens de referência (o fantasma que deu origem à primeira marca; o mockup de inspiração fica só no PC, fora do repositório).

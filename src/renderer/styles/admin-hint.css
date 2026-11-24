@@ -8,6 +8,9 @@
   color: var(--muted);
 }
 .admin-hint[hidden] { display: none; }
+/* aberto como administrador em outra conta: texto legível e ícone no tom de aviso */
+.admin-hint.is-warning { align-items: flex-start; color: var(--soft); }
+.admin-hint.is-warning svg { margin-top: 2px; stroke: var(--danger-text); }
 .admin-hint svg {
   width: 16px;
   height: 16px;

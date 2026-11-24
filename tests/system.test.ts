@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { isInfoFile } from '../src/cleaner/recycle-bin';
 import { localDrives, parseDriveLetters, parseSid } from '../src/cleaner/system';
-import { isElevatedGroups } from '../src/main/integrity';
+import { isElevatedGroups, isOtherAccount, launchFlag, launcherSid } from '../src/main/integrity';
 
 // linhas de "whoami /groups /fo csv /nh" (o nome do grupo muda com o idioma; o SID não)
 const MEDIUM = '"Rótulo Obrigatório\\Nível Obrigatório Médio","Rótulo","S-1-16-8192",""';
@@ -40,4 +40,17 @@ test('discos: só letras de C a Z, sem repetir', () => {
 test('discos locais deste PC incluem o do sistema (só lê)', async () => {
   const drives = await localDrives();
   assert.ok(drives.includes((process.env.SystemDrive ?? 'C:').slice(0, 1).toUpperCase()), drives.join(','));
+});
+
+test('reaberto como admin: lê o SID de quem pediu e compara com a conta atual', () => {
+  const ana = 'S-1-5-21-111-222-333-1001';
+  const admin = 'S-1-5-21-111-222-333-500';
+  assert.equal(launcherSid(['Vanish.exe', launchFlag(ana)]), ana);
+  assert.equal(launcherSid(['Vanish.exe']), undefined, 'aberto normalmente');
+  assert.equal(launcherSid(['Vanish.exe', '--launched-by=nao-e-sid']), undefined, 'valor estranho é ignorado');
+  assert.equal(isOtherAccount(ana, ana), false, 'mesma conta (admin da própria pessoa)');
+  assert.equal(isOtherAccount(ana, ana.toLowerCase()), false);
+  assert.equal(isOtherAccount(ana, admin), true, 'UAC com a senha de outro administrador');
+  assert.equal(isOtherAccount(undefined, admin), false, 'sem argumento não avisa');
+  assert.equal(isOtherAccount(ana, undefined), false, 'sem saber a conta atual não avisa');
 });

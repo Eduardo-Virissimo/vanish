@@ -75,6 +75,11 @@ export interface InitData {
   categories: CategoryInfo[];
   /** já roda como administrador (senão algumas categorias mostram "Precisa de admin") */
   isAdmin: boolean;
+  /**
+   * nome da conta em que o Vanish está rodando, quando o "Abrir como administrador" o reabriu numa
+   * conta diferente da de quem pediu (UAC com a senha de outro administrador)
+   */
+  otherAccount?: string;
 }
 
 /** Atualização pelo GitHub: baixando em segundo plano ou pronta para instalar ao reiniciar */

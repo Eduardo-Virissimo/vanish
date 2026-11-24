@@ -26,6 +26,8 @@ export interface AppState {
   history: CleanRecord[];
   /** o app está rodando como administrador (senão algumas categorias precisam dele) */
   isAdmin: boolean;
+  /** conta em que o app foi reaberto como administrador, se não for a de quem pediu */
+  otherAccount?: string;
   /** versão nova do GitHub pronta para instalar (null = nenhuma) */
   update: UpdateStatus | null;
   /** pastas que não abriram no Explorador (sumiram depois da análise) */
@@ -42,7 +44,7 @@ export interface AppState {
 
 /** memory: o que veio do localStorage (histórico e categorias que o usuário desmarcou) */
 export const createState = (
-  { categories, isAdmin }: InitData,
+  { categories, isAdmin, otherAccount }: InitData,
   memory: { history: CleanRecord[]; unchecked: Set<CategoryId> },
 ): AppState => ({
   disk: null,
@@ -50,6 +52,7 @@ export const createState = (
   problem: null,
   history: memory.history,
   isAdmin,
+  otherAccount,
   update: null,
   unopened: new Set(),
   path: '',

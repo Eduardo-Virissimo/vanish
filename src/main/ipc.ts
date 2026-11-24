@@ -1,13 +1,15 @@
 // Responde aos pedidos da tela. Os canais e formatos estão em shared/ipc.ts.
 import { BrowserWindow, ipcMain, shell, type IpcMainInvokeEvent, type WebContents } from 'electron';
 import { statfs } from 'node:fs/promises';
-import { homedir } from 'node:os';
+import { homedir, userInfo } from 'node:os';
 import { categories } from '../cleaner/categories';
 import { cleanCategory, scanCategory } from '../cleaner/engine';
+import { currentSid } from '../cleaner/system';
 import type { EventChannel, EventMap, InvokeChannel, InvokeMap } from '../shared/ipc';
 import type { CleanResult, ScanResult } from '../shared/types';
 import { BG } from './window';
 import { isAdmin, relaunchAsAdmin } from './admin';
+import { isOtherAccount, launcherSid } from './integrity';
 import { logError } from './log';
 import { taskbar } from './taskbar';
 import { installNow } from './updater';
@@ -49,6 +51,10 @@ export function registerIpc(): void {
   handle('app:init', async () => ({
     home: homedir(),
     isAdmin: await isAdmin(),
+    // reaberto como administrador pelo UAC em outra conta: a tela avisa de quem é o que será limpo
+    otherAccount: isOtherAccount(launcherSid(process.argv), await currentSid().catch(() => undefined))
+      ? userInfo().username
+      : undefined,
     // só o que a tela precisa: os caminhos ficam no processo principal
     categories: categories.map(({ id, name, color, icon, hint, optIn, warning, closeFirst }) => ({
       id, name, color, icon, hint, warning, closeFirst, defaultSelected: !optIn,

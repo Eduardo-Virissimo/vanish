@@ -51,7 +51,7 @@ cleaner/
 │   │   ├── timing.ts       utilitários: limitar envios e impedir duas tarefas ao mesmo tempo
 │   │   ├── taskbar.ts      progresso no ícone da barra de tarefas (análise e limpeza)
 │   │   ├── admin.ts        saber se roda como administrador e reabrir o próprio app elevado (UAC)
-│   │   ├── integrity.ts    lê o nível de integridade no "whoami /groups" (elevado = S-1-16-12288)
+│   │   ├── integrity.ts    nível de integridade (elevado = S-1-16-12288) e SID de quem pediu "Abrir como administrador"
 │   │   ├── log.ts          registro de erros em %APPDATA%\Vanish\logs\vanish.log (só local, até ~1 MB)
 │   │   └── updater.ts      atualização automática pelas releases do GitHub (electron-updater)
 │   │

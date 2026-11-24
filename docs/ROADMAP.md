@@ -92,10 +92,11 @@ pelo workflow corrigido (release criada antes do envio dos arquivos) e pelo flux
    limpeza com erro numa categoria mostra o nome dela e leva para "Analisar de novo".
 4. ✅ **Admin detectado pelo nível de integridade** (`whoami /groups`, `main/integrity.ts`), não mais
    por `net session`.
-5. **Avisar quando o "Abrir como administrador" troca de conta** (usuário padrão + senha de outro
-   admin: o app passaria a limpar os caches e a Lixeira da outra conta).
+5. ✅ **Aviso quando o "Abrir como administrador" troca de conta**: a cópia elevada recebe o SID de
+   quem pediu e, se for outra conta, avisa de quem são os caches e a Lixeira que serão limpos.
 6. ✅ **Lixeira conta cada item uma vez** (os arquivos `$I` de informação não entram na contagem).
-7. **Fechar no meio da limpeza** pergunta antes; **log em arquivo** e "Copiar diagnóstico".
+7. ✅ **Fechar no meio da limpeza** pergunta antes; ✅ **log em arquivo**
+   (`%APPDATA%\Vanish\logs\vanish.log`). Falta: botão "Copiar diagnóstico" na gaveta.
 8. ✅ `LICENSE` (ISC) e CI em todo push (`.github/workflows/ci.yml`). Falta: tela "Sobre" (versão,
    GitHub, procurar atualização).
 9. Tipo de alvo "rodar comando" (item 4 abaixo) e `Code\CachedExtensionVSIXs` (2,1 GB no PC

@@ -4,10 +4,17 @@
   "version": "0.5.2",
   "description": "Limpa arquivos temporários e caches do Windows",
   "author": "Eduardo",
+  "engines": {
+    "node": ">=22"
+  },
   "main": "dist/main.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/Eduardo-Virissimo/vanish.git"
+  },
+  "homepage": "https://github.com/Eduardo-Virissimo/vanish#readme",
+  "bugs": {
+    "url": "https://github.com/Eduardo-Virissimo/vanish/issues"
   },
   "scripts": {
     "build": "node scripts/build.mjs",

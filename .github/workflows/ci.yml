@@ -1,12 +1,13 @@
-# Confere cada push e pull request na main: typecheck, testes (regras de segurança + motor em
-# pastas falsas) e build. Publicar versão é outro workflow (release.yml, disparado por tag).
+# Confere cada push e pull request em main e dev: typecheck, testes (regras de segurança + motor
+# em pastas falsas) e build. Publicar versão é outro workflow (release.yml, disparado por tag).
+# Fluxo de branches: docs/GIT.md
 name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, dev]
   pull_request:
-    branches: [main]
+    branches: [main, dev]
 
 permissions:
   contents: read

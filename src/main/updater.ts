@@ -5,6 +5,7 @@
 import { app, type WebContents } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import type { UpdateStatus } from '../shared/types';
+import { logError } from './log';
 import { isBusy } from './timing';
 
 const FIRST_CHECK_MS = 5_000;
@@ -25,7 +26,7 @@ export function startUpdater(wc: WebContents) {
   autoUpdater.on('update-available', (info) => send({ state: 'downloading', version: info.version }));
   autoUpdater.on('update-downloaded', (info) => send({ state: 'ready', version: info.version }));
   // sem internet, GitHub fora do ar, sem releases: tenta de novo na próxima rodada, sem incomodar
-  autoUpdater.on('error', (error) => console.warn('Atualização:', error.message));
+  autoUpdater.on('error', (error) => logError('atualização', error));
 
   const check = () => {
     if (status?.state === 'ready') return;

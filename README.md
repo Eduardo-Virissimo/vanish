@@ -41,7 +41,8 @@ palavra: dá para conferir.
   ([Actions](.github/workflows/release.yml)) a partir deste código público, não no meu PC.
 - **Sem coleta de dados, sem propaganda.** O app só se conecta à internet para procurar versões
   novas nas [releases deste repositório](https://github.com/Eduardo-Virissimo/vanish/releases).
-  Nada sobre você ou seu PC é enviado.
+  Nada sobre você ou seu PC é enviado. Erros ficam num registro só no seu PC
+  (`%APPDATA%\Vanish\logs\vanish.log`), para você mandar se quiser relatar um problema.
 - **Lista fechada e auditada.** Cada pasta que pode ser limpa tem fonte e justificativa na
   [auditoria de segurança](docs/SAFETY-AUDIT.md). Sem fonte confiável, não entra.
 - **Travas no próprio app**, checadas na análise e de novo na hora de apagar:

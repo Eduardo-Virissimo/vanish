@@ -8,6 +8,7 @@ import type { EventChannel, EventMap, InvokeChannel, InvokeMap } from '../shared
 import type { CleanResult, ScanResult } from '../shared/types';
 import { BG } from './window';
 import { isAdmin, relaunchAsAdmin } from './admin';
+import { logError } from './log';
 import { taskbar } from './taskbar';
 import { installNow } from './updater';
 import { exclusive, latest, throttle } from './timing';
@@ -67,7 +68,7 @@ export function registerIpc(): void {
     const onPath = latest((p: string) => emit('progress:path', p), 60);
     const results = await Promise.all(categories.map(async (category) => {
       const result = { id: category.id, ...(await scanCategory(category, onPath).catch((error) => {
-        console.warn(`Análise de ${category.id}:`, error);
+        logError(`análise de ${category.id}`, error);
         return FAILED_SCAN;
       })) };
       emit('scan:category', result);
@@ -113,7 +114,7 @@ export function registerIpc(): void {
       const onFreed = throttle((freed: number) => emit('clean:progress', { id: category.id, freed }), 80);
       const result = await cleanCategory(category, { onPath, onFreed }).catch((error) => {
         // o que já foi apagado antes do erro não volta, mas a tela precisa saber que parou
-        console.warn(`Limpeza de ${category.id}:`, error);
+        logError(`limpeza de ${category.id}`, error);
         total.failed?.push(category.name);
         return EMPTY_CLEAN;
       });

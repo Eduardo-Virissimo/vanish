@@ -41,7 +41,8 @@ cleaner/
 │   │   ├── safety.ts       onde se pode apagar (áreas, pastas proibidas, dados do usuário); vale nos testes E ao rodar
 │   │   ├── fs-walk.ts      percorre pastas sem seguir links; resolve "*" nos caminhos
 │   │   ├── engine.ts       scanCategory (só lê) e cleanCategory (apaga), com detalhe por pasta
-│   │   └── recycle-bin.ts  lê o tamanho e esvazia a Lixeira
+│   │   ├── recycle-bin.ts  lê o tamanho e esvazia a Lixeira
+│   │   └── system.ts       SID do usuário e discos locais (a Lixeira ignora unidades de rede)
 │   │
 │   ├── main/               processo principal do Electron
 │   │   ├── index.ts        entrada: uma janela só (trava de instância), sem menu padrão, registra o IPC e abre a janela
@@ -51,6 +52,7 @@ cleaner/
 │   │   ├── taskbar.ts      progresso no ícone da barra de tarefas (análise e limpeza)
 │   │   ├── admin.ts        saber se roda como administrador e reabrir o próprio app elevado (UAC)
 │   │   ├── integrity.ts    lê o nível de integridade no "whoami /groups" (elevado = S-1-16-12288)
+│   │   ├── log.ts          registro de erros em %APPDATA%\Vanish\logs\vanish.log (só local, até ~1 MB)
 │   │   └── updater.ts      atualização automática pelas releases do GitHub (electron-updater)
 │   │
 │   ├── preload/

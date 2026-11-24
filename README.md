@@ -52,7 +52,10 @@ palavra: dá para conferir.
     estiver apontando para o disco inteiro, a categoria é bloqueada em vez de apagar tudo);
   - temporários só com mais de 24 h, pela data de criação (instaladores rodando não são afetados);
   - arquivos em uso são pulados; Windows Update fica bloqueado com reinício pendente;
-  - a tela não tem acesso ao disco e só consegue pedir categorias conhecidas.
+  - arquivos que um instalador agendou para o próximo reinício nunca são apagados;
+  - se o "Abrir como administrador" cair na conta de outra pessoa, o app avisa antes;
+  - a tela não tem acesso ao disco e só consegue pedir categorias conhecidas; pedidos que não
+    vêm da própria tela do app são recusados, e permissões como câmera ou notificações são negadas.
 - **Testes automáticos em toda mudança** ([CI](.github/workflows/ci.yml)): as regras de segurança
   de todas as categorias, o motor de limpeza rodando em pastas falsas (nunca no PC de verdade) e
   casos como `TEMP=C:\`. Uma versão só é publicada se tudo passar.

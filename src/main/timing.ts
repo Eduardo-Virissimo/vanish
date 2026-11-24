@@ -22,18 +22,21 @@ export function throttle<T>(fn: (value: T) => void, ms: number): (value: T) => v
   };
 }
 
-let busy = false;
+type Task = 'scan' | 'clean';
+let running: Task | null = null;
 
 /** tem análise ou limpeza rodando agora (a atualização espera terminar) */
-export const isBusy = () => busy;
+export const isBusy = () => running !== null;
+/** o que está rodando agora (fechar no meio de uma limpeza pede confirmação) */
+export const currentTask = () => running;
 
 /** Impede que uma análise e uma limpeza rodem ao mesmo tempo */
-export async function exclusive<T>(task: () => Promise<T>): Promise<T> {
-  if (busy) throw new Error('Já existe uma tarefa em andamento');
-  busy = true;
+export async function exclusive<T>(task: Task, work: () => Promise<T>): Promise<T> {
+  if (running) throw new Error('Já existe uma tarefa em andamento');
+  running = task;
   try {
-    return await task();
+    return await work();
   } finally {
-    busy = false;
+    running = null;
   }
 }

@@ -6,23 +6,17 @@ import { basename, dirname } from 'node:path';
 import { promisify } from 'node:util';
 import type { CleanResult, FolderInfo, ScanResult } from '../shared/types';
 import { walk } from './fs-walk';
+import { currentSid, localDrives } from './system';
 
 const run = promisify(execFile);
-const DRIVES = 'CDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
 /** "$IAB12CD.txt": arquivo de informação da Lixeira (não é o conteúdo apagado) */
 export const isInfoFile = (name: string) => /^\$i[a-z0-9]{6}/i.test(name);
 
-async function currentSid(): Promise<string> {
-  const { stdout } = await run('whoami', ['/user', '/fo', 'csv', '/nh'], { windowsHide: true });
-  const sid = stdout.match(/"(S-[\d-]+)"/)?.[1];
-  if (!sid) throw new Error('SID do usuário não encontrado');
-  return sid;
-}
-
+/** só discos locais: uma unidade de rede desconectada travaria a análise (system.ts) */
 async function recycleRoots(): Promise<string[]> {
-  const sid = await currentSid();
-  const roots = DRIVES.map((d) => `${d}:\\$Recycle.Bin\\${sid}`);
+  const [sid, drives] = await Promise.all([currentSid(), localDrives()]);
+  const roots = drives.map((d) => `${d}:\\$Recycle.Bin\\${sid}`);
   const found = await Promise.all(roots.map((r) => access(r).then(() => true, () => false)));
   return roots.filter((_, i) => found[i]);
 }

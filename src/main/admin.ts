@@ -2,17 +2,17 @@
 // O relançamento sempre usa o executável do próprio app (nunca um caminho vindo da tela).
 import { app } from 'electron';
 import { execFile } from 'node:child_process';
+import { isElevatedGroups } from './integrity';
 
 const run = (file: string, args: string[]) =>
-  new Promise<void>((resolve, reject) => {
-    execFile(file, args, { windowsHide: true }, (error) => (error ? reject(error) : resolve()));
+  new Promise<string>((resolve, reject) => {
+    execFile(file, args, { windowsHide: true }, (error, stdout) => (error ? reject(error) : resolve(stdout)));
   });
 
 let cached: Promise<boolean> | null = null;
 
-/** "net session" só funciona elevado: é o jeito clássico de checar sem módulo nativo */
 export function isAdmin(): Promise<boolean> {
-  cached ??= run('net', ['session']).then(() => true, () => false);
+  cached ??= run('whoami', ['/groups', '/fo', 'csv', '/nh']).then(isElevatedGroups, () => false);
   return cached;
 }
 

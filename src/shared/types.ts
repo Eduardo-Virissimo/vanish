@@ -66,6 +66,8 @@ export interface CleanResult {
   skipped: number;
   /** o que sobrou em cada pasta depois da limpeza */
   folders?: FolderInfo[];
+  /** nomes das categorias cuja limpeza deu erro no meio (as outras continuaram) */
+  failed?: string[];
 }
 
 export interface InitData {

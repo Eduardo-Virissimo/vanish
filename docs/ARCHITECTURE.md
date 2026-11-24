@@ -23,7 +23,8 @@ cleaner/
 ├── tests/
 │   ├── categories.test.ts  regras de segurança de TODAS as categorias (o "guarda-costas")
 │   ├── engine.test.ts      motor de análise/limpeza em pastas falsas
-│   └── safety.test.ts      regras de lugar seguro com TEMP/LOCALAPPDATA falsos (ex.: TEMP=C:\)
+│   ├── safety.test.ts      regras de lugar seguro com TEMP/LOCALAPPDATA falsos (ex.: TEMP=C:\)
+│   └── system.test.ts      nível de administrador (whoami) e arquivos $I/$R da Lixeira
 ├── src/
 │   ├── shared/             usado pelos dois lados (main e tela)
 │   │   ├── types.ts        formatos de dados: categoria, pasta, aviso, resultado, disco
@@ -49,6 +50,7 @@ cleaner/
 │   │   ├── timing.ts       utilitários: limitar envios e impedir duas tarefas ao mesmo tempo
 │   │   ├── taskbar.ts      progresso no ícone da barra de tarefas (análise e limpeza)
 │   │   ├── admin.ts        saber se roda como administrador e reabrir o próprio app elevado (UAC)
+│   │   ├── integrity.ts    lê o nível de integridade no "whoami /groups" (elevado = S-1-16-12288)
 │   │   └── updater.ts      atualização automática pelas releases do GitHub (electron-updater)
 │   │
 │   ├── preload/
@@ -215,6 +217,8 @@ Regras que mantêm isso (não quebrar):
   gerar `release/Vanish-Setup-x.y.z.exe`: instalador NSIS de um clique, por usuário, sem admin.
   O `electron-updater` fica fora do bundle do esbuild (`external`) e entra como dependência
   normal no `app.asar`.
+- `.github/workflows/ci.yml`: em todo push e pull request na `main`, roda typecheck, testes e
+  build numa máquina Windows do GitHub.
 - `.github/workflows/release.yml`: ao receber uma tag `vX.Y.Z`, o GitHub confere que a tag bate
   com o `package.json`, roda typecheck e testes, gera o instalador e publica a release com o
   `latest.yml` e o `.blockmap`.

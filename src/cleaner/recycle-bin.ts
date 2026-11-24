@@ -2,13 +2,16 @@
 // para esvaziar usamos o próprio Windows (Clear-RecycleBin), que atualiza o ícone da lixeira.
 import { execFile } from 'node:child_process';
 import { access } from 'node:fs/promises';
-import { basename } from 'node:path';
+import { basename, dirname } from 'node:path';
 import { promisify } from 'node:util';
 import type { CleanResult, FolderInfo, ScanResult } from '../shared/types';
 import { walk } from './fs-walk';
 
 const run = promisify(execFile);
 const DRIVES = 'CDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+
+/** "$IAB12CD.txt": arquivo de informação da Lixeira (não é o conteúdo apagado) */
+export const isInfoFile = (name: string) => /^\$i[a-z0-9]{6}/i.test(name);
 
 async function currentSid(): Promise<string> {
   const { stdout } = await run('whoami', ['/user', '/fo', 'csv', '/nh'], { windowsHide: true });
@@ -30,9 +33,14 @@ export async function scanRecycleBin(onPath: (p: string) => void): Promise<ScanR
     const folder: FolderInfo = { path: root, bytes: 0, files: 0, denied: false, note: 'Esvaziada pelo próprio Windows' };
     await walk(root, {
       onFile: (file, size) => {
-        if (basename(file).toLowerCase() === 'desktop.ini') return;
+        // só o primeiro nível é da própria Lixeira; dentro de uma pasta apagada tudo é do usuário
+        const top = dirname(file) === root;
+        const name = basename(file);
+        if (top && name.toLowerCase() === 'desktop.ini') return;
         folder.bytes += size;
-        folder.files++;
+        // cada item apagado vira dois arquivos: $I (data e caminho original) e $R (o conteúdo).
+        // Só o conteúdo conta como arquivo, senão "N arquivos" sai dobrado
+        if (!(top && isInfoFile(name))) folder.files++;
         onPath(file);
       },
     });

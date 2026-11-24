@@ -135,6 +135,8 @@ export function createController(state: AppState, bar: PixelBar, render: () => v
     render();
     try {
       state.result = await api.invoke('clean', ids);
+      // uma categoria deu erro no meio: as outras foram limpas, mas não é um sucesso completo
+      if (state.result.failed?.length) state.problem = 'clean';
     } catch {
       // parou no meio: mostra só o que de fato saiu, nunca "0 arquivos" como se tivesse dado certo
       state.problem = 'clean';

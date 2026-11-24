@@ -23,7 +23,11 @@ const emitter = (wc: WebContents) => <K extends EventChannel>(channel: K, data: 
   if (!wc.isDestroyed()) wc.send(channel, data);
 };
 
-const EMPTY_SCAN: ScanResult = { bytes: 0, files: 0, denied: false, folders: [] };
+/** a análise da categoria deu erro: nunca mostrar como "Vazia" (pareceria que não há nada) */
+const FAILED_SCAN: ScanResult = {
+  bytes: 0, files: 0, denied: false, folders: [],
+  blocked: { label: 'Não analisada', reason: 'Algo deu errado ao ler as pastas desta categoria. Analise de novo' },
+};
 const EMPTY_CLEAN: CleanResult = { freed: 0, removed: 0, skipped: 0 };
 
 /** Pastas da última análise: as únicas que a tela pode pedir para abrir no Explorador */
@@ -51,7 +55,10 @@ export function registerIpc(): void {
     progress.busy();
     const onPath = latest((p: string) => emit('progress:path', p), 60);
     const results = await Promise.all(categories.map(async (category) => {
-      const result = { id: category.id, ...(await scanCategory(category, onPath).catch(() => EMPTY_SCAN)) };
+      const result = { id: category.id, ...(await scanCategory(category, onPath).catch((error) => {
+        console.warn(`Análise de ${category.id}:`, error);
+        return FAILED_SCAN;
+      })) };
       emit('scan:category', result);
       return result;
     }));
@@ -85,7 +92,7 @@ export function registerIpc(): void {
     const onPath = latest((p: string) => emit('progress:path', p), 60);
     // Só aceita ids que existem na lista fechada de categorias
     const wanted = new Set(Array.isArray(ids) ? ids : []);
-    const total = { ...EMPTY_CLEAN };
+    const total: CleanResult = { ...EMPTY_CLEAN, failed: [] };
     const chosen = categories.filter((c) => wanted.has(c.id));
     const progress = taskbar(event.sender);
 
@@ -93,7 +100,12 @@ export function registerIpc(): void {
       progress.set(index / chosen.length);
       emit('clean:start', { id: category.id });
       const onFreed = throttle((freed: number) => emit('clean:progress', { id: category.id, freed }), 80);
-      const result = await cleanCategory(category, { onPath, onFreed }).catch(() => EMPTY_CLEAN);
+      const result = await cleanCategory(category, { onPath, onFreed }).catch((error) => {
+        // o que já foi apagado antes do erro não volta, mas a tela precisa saber que parou
+        console.warn(`Limpeza de ${category.id}:`, error);
+        total.failed?.push(category.name);
+        return EMPTY_CLEAN;
+      });
       total.freed += result.freed;
       total.removed += result.removed;
       total.skipped += result.skipped;

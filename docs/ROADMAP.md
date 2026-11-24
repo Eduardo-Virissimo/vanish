@@ -83,13 +83,16 @@ Segurança primeiro, depois bugs, depois produto e mais lugares para limpar.
    app agora são as mesmas.
 2. ✅ **Idade mínima pela data mais nova** entre criação e modificação (arquivos extraídos de zip
    mantêm a data antiga).
-3. **Erro numa categoria não pode virar "Vazia"** (`main/ipc.ts` troca a falha por um resultado vazio).
-4. **Detectar admin sem `net session`** (falha se o serviço "Servidor" estiver desligado).
+3. ✅ **Erro numa categoria não vira mais "Vazia"**: análise com erro aparece como "Não analisada";
+   limpeza com erro numa categoria mostra o nome dela e leva para "Analisar de novo".
+4. ✅ **Admin detectado pelo nível de integridade** (`whoami /groups`, `main/integrity.ts`), não mais
+   por `net session`.
 5. **Avisar quando o "Abrir como administrador" troca de conta** (usuário padrão + senha de outro
    admin: o app passaria a limpar os caches e a Lixeira da outra conta).
-6. **Lixeira conta cada item duas vezes** (`$I` + `$R`).
+6. ✅ **Lixeira conta cada item uma vez** (os arquivos `$I` de informação não entram na contagem).
 7. **Fechar no meio da limpeza** pergunta antes; **log em arquivo** e "Copiar diagnóstico".
-8. ✅ `LICENSE` (ISC). Falta: tela "Sobre" (versão, GitHub, procurar atualização), CI rodando testes em todo push.
+8. ✅ `LICENSE` (ISC) e CI em todo push (`.github/workflows/ci.yml`). Falta: tela "Sobre" (versão,
+   GitHub, procurar atualização).
 9. Tipo de alvo "rodar comando" (item 4 abaixo) e `Code\CachedExtensionVSIXs` (2,1 GB no PC
    auditado; falta fonte).
 

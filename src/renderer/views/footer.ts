@@ -41,7 +41,7 @@ function footerCopy(s: AppState): FooterCopy {
   if (s.problem && (s.phase === 'idle' || s.phase === 'done')) {
     const message = s.problem === 'scan'
       ? 'A análise não terminou, então não dá para saber o que liberar. Analise de novo.'
-      : `A limpeza parou no meio${s.result?.freed ? `, depois de liberar ${formatBytes(s.result.freed)}` : ''}. Analise de novo para ver o que sobrou.`;
+      : `${s.result?.failed?.length ? `A limpeza de ${s.result.failed.join(' e ')} deu erro` : 'A limpeza parou no meio'}${s.result?.freed ? `, depois de liberar ${formatBytes(s.result.freed)}` : ''}. Analise de novo para ver o que sobrou.`;
     return { message, button: 'Analisar de novo', disabled: false };
   }
 

@@ -2,7 +2,7 @@
 // Quase tudo testa só a leitura da saída dos comandos; um teste consulta os discos deste PC (só lê).
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { isInfoFile } from '../src/cleaner/recycle-bin';
+import { drivesWithItems, isInfoFile } from '../src/cleaner/recycle-bin';
 import { localDrives, parseDriveLetters, parseSid } from '../src/cleaner/system';
 import { isElevatedGroups, isOtherAccount, launchFlag, launcherSid } from '../src/main/integrity';
 
@@ -53,4 +53,15 @@ test('reaberto como admin: lê o SID de quem pediu e compara com a conta atual',
   assert.equal(isOtherAccount(ana, admin), true, 'UAC com a senha de outro administrador');
   assert.equal(isOtherAccount(undefined, admin), false, 'sem argumento não avisa');
   assert.equal(isOtherAccount(ana, undefined), false, 'sem saber a conta atual não avisa');
+});
+
+test('Lixeira: só esvazia os discos onde há algo, com letras válidas', () => {
+  const folder = (path: string, files: number) => ({ path, bytes: files * 10, files, denied: false });
+  assert.deepEqual(drivesWithItems([
+    folder(String.raw`C:\$Recycle.Bin\S-1-5-21-1`, 3),
+    folder(String.raw`D:\$Recycle.Bin\S-1-5-21-1`, 0),
+    folder(String.raw`e:\$Recycle.Bin\S-1-5-21-1`, 1),
+    folder(String.raw`C:\$Recycle.Bin\S-1-5-21-1`, 2),
+  ]), ['C', 'E']);
+  assert.deepEqual(drivesWithItems([folder(String.raw`\\servidor\x`, 5)]), [], 'caminho de rede não vira letra');
 });

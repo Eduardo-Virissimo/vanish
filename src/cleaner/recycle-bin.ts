@@ -13,6 +13,11 @@ const run = promisify(execFile);
 /** "$IAB12CD.txt": arquivo de informação da Lixeira (não é o conteúdo apagado) */
 export const isInfoFile = (name: string) => /^\$i[a-z0-9]{6}/i.test(name);
 
+/** letras dos discos cuja lixeira tem algo ("C:\$Recycle.Bin\S-..." com bytes → "C") */
+export const drivesWithItems = (folders: FolderInfo[]) =>
+  [...new Set(folders.filter((f) => f.files > 0 || f.bytes > 0).map((f) => f.path.slice(0, 1).toUpperCase()))]
+    .filter((l) => /^[C-Z]$/.test(l));
+
 /** só discos locais: uma unidade de rede desconectada travaria a análise (system.ts) */
 async function recycleRoots(): Promise<string[]> {
   const [sid, drives] = await Promise.all([currentSid(), localDrives()]);
@@ -51,10 +56,15 @@ export async function scanRecycleBin(onPath: (p: string) => void): Promise<ScanR
 export async function emptyRecycleBin(onPath: (p: string) => void): Promise<CleanResult> {
   const before = await scanRecycleBin(() => {});
   onPath('Lixeira');
-  await run('powershell.exe', [
-    '-NoProfile', '-NonInteractive', '-Command',
-    'Clear-RecycleBin -Force -ErrorAction SilentlyContinue',
-  ], { windowsHide: true });
+  // só os discos locais onde há algo na lixeira: sem -DriveLetter o Clear-RecycleBin passa por
+  // todos, inclusive unidades de rede desconectadas, e pode travar esperando a rede
+  const letters = drivesWithItems(before.folders);
+  if (letters.length) {
+    await run('powershell.exe', [
+      '-NoProfile', '-NonInteractive', '-Command',
+      `Clear-RecycleBin -DriveLetter ${letters.join(',')} -Force -ErrorAction SilentlyContinue`,
+    ], { windowsHide: true });
+  }
   const after = await scanRecycleBin(() => {});
   return {
     freed: Math.max(0, before.bytes - after.bytes),

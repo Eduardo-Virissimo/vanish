@@ -85,8 +85,9 @@ Não precisa mexer em mais nada: a tela recebe nome, cor, ícone e aviso pelo IP
 | auditoria | categoria sem seção `### <nome>` em `docs/SAFETY-AUDIT.md` |
 | motor | soma de tamanhos, limpeza, junção não seguida, idade mínima, filtro por nome, `*` no nome |
 
-Se uma regra precisar mudar (ex.: liberar uma área nova), mude em `tests/categories.test.ts` **e**
-explique o porquê na auditoria.
+As regras moram em `src/cleaner/safety.ts` e valem também com o app rodando: o motor bloqueia
+qualquer pasta que não passe nelas. Se uma regra precisar mudar (ex.: liberar uma área nova), mude
+em `safety.ts`, acrescente um caso em `tests/safety.test.ts` **e** explique o porquê na auditoria.
 
 ## Outras mudanças comuns
 

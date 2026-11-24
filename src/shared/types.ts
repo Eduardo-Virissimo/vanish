@@ -41,13 +41,21 @@ export interface FolderInfo {
   note?: string;
 }
 
+/** Categoria que não pode ser limpa agora: texto curto na linha e explicação completa */
+export interface Blocked {
+  /** ex.: "Reinicie antes" */
+  label: string;
+  /** frase completa para o tooltip e a gaveta, sem ponto final */
+  reason: string;
+}
+
 export interface ScanResult {
   bytes: number;
   files: number;
   /** true quando nada pôde ser lido por falta de permissão (precisa de admin) */
   denied: boolean;
-  /** motivo de a categoria estar bloqueada agora (ex.: atualização esperando reiniciar) */
-  blocked?: string;
+  /** a categoria está bloqueada agora (ex.: atualização esperando reiniciar, pasta fora do lugar) */
+  blocked?: Blocked;
   folders: FolderInfo[];
 }
 

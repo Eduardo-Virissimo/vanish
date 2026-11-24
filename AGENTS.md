@@ -38,7 +38,8 @@ Este app **apaga arquivos**. Um erro aqui destrói dados do usuário.
 - **Sem fonte, não entra.** Se a documentação do programa disser para limpar só com o comando dele
   (ex.: `uv cache clean`, `pnpm store prune`), não apague por caminho.
 - `npm test` (`tests/categories.test.ts`) recusa pastas fora das áreas permitidas, pastas do sistema e
-  dados do usuário. **Nunca afrouxe essas regras para fazer uma categoria passar**; se precisar mudar
+  dados do usuário. As regras ficam em `src/cleaner/safety.ts` e o motor as aplica **também no PC do
+  usuário** (variáveis como `TEMP` podem estar erradas lá); não remover essa checagem. **Nunca afrouxe essas regras para fazer uma categoria passar**; se precisar mudar
   uma regra, explique na auditoria.
 - Temporários respeitam idade mínima (`minAgeMs`); não reduzir sem motivo.
 - Toda pasta nova precisa de uma linha na [auditoria](docs/SAFETY-AUDIT.md) com fonte. Alvos

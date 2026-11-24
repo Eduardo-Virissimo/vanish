@@ -22,7 +22,8 @@ cleaner/
 │   └── render-icon.cjs     transforma o logo.svg em icon.png usando o próprio Electron
 ├── tests/
 │   ├── categories.test.ts  regras de segurança de TODAS as categorias (o "guarda-costas")
-│   └── engine.test.ts      motor de análise/limpeza em pastas falsas
+│   ├── engine.test.ts      motor de análise/limpeza em pastas falsas
+│   └── safety.test.ts      regras de lugar seguro com TEMP/LOCALAPPDATA falsos (ex.: TEMP=C:\)
 ├── src/
 │   ├── shared/             usado pelos dois lados (main e tela)
 │   │   ├── types.ts        formatos de dados: categoria, pasta, aviso, resultado, disco
@@ -36,6 +37,7 @@ cleaner/
 │   │   ├── paths.ts        pastas do Windows (%TEMP%, %LOCALAPPDATA%…) e atalhos para caches
 │   │   ├── types.ts        tipos Target (uma pasta), Category, Guard e defineCategory()
 │   │   ├── guards.ts       travas checadas antes de analisar/limpar (ex.: reinício pendente)
+│   │   ├── safety.ts       onde se pode apagar (áreas, pastas proibidas, dados do usuário); vale nos testes E ao rodar
 │   │   ├── fs-walk.ts      percorre pastas sem seguir links; resolve "*" nos caminhos
 │   │   ├── engine.ts       scanCategory (só lê) e cleanCategory (apaga), com detalhe por pasta
 │   │   └── recycle-bin.ts  lê o tamanho e esvazia a Lixeira
@@ -117,6 +119,12 @@ exige mexer na tela.
 aponte para fora das áreas permitidas, para pastas do sistema ou para dados do usuário, ou que
 falte na auditoria. Regras em [MAINTENANCE.md](MAINTENANCE.md).
 
+**As mesmas regras valem na hora de rodar.** As pastas-base vêm de variáveis de ambiente
+(`TEMP`, `LOCALAPPDATA`...), que podem estar erradas no PC do usuário (ex.: `TEMP=C:\`). Por isso
+`src/cleaner/safety.ts` guarda as regras (os testes importam de lá) e o motor confere cada pasta
+resolvida antes de ler **e** antes de apagar. Uma pasta fora das regras bloqueia a categoria
+inteira (`blocked`, rótulo "Bloqueada"), sem ler nada dela.
+
 ## Canais de comunicação (IPC)
 
 Definidos em `src/shared/ipc.ts`.
@@ -145,8 +153,9 @@ começa por trás; ao sumir, a tela chama `window:splash-done`.
 ### Análise
 1. `renderer/controller.ts` chama `invoke('scan')`.
 2. `main/ipc.ts` roda `scanCategory` para cada categoria, em paralelo.
-3. Antes de ler, o motor confere a trava da categoria (`guards.ts`); se falhar, a categoria volta
-   com `blocked` e a tela mostra o motivo.
+3. Antes de ler, o motor confere se todas as pastas resolvidas passam nas regras de `safety.ts` e
+   a trava da categoria (`guards.ts`). Se falhar, a categoria volta com `blocked`: `label` curto
+   para a linha e `reason` completo para o tooltip e a gaveta.
 4. Cada categoria que termina vira um aviso `scan:category` (a linha na tela atualiza).
 5. O `invoke('scan')` devolve todos os resultados juntos; só então a barra acende.
    (Avisos e a resposta do invoke podem chegar fora de ordem, por isso a barra usa a resposta.)

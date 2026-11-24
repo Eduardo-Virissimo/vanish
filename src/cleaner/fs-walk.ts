@@ -27,6 +27,15 @@ function createLimit(max: number) {
 
 export const limit = createLimit(48);
 
+/**
+ * Há quanto tempo o arquivo (ou pasta) existe/mudou. Usa a data MAIS NOVA entre criação e
+ * modificação: quem extrai um zip mantém a data de modificação original (ex.: 2023), mas a
+ * data de criação é a da extração. Só a modificação faria um instalador recém-extraído
+ * parecer velho e ser apagado no meio da instalação.
+ */
+export const ageMs = (st: { mtimeMs: number; birthtimeMs: number }, now = Date.now()) =>
+  now - Math.max(st.mtimeMs, st.birthtimeMs);
+
 const isRealDir = async (p: string) => {
   try {
     const st = await lstat(p);
@@ -96,7 +105,7 @@ export async function walk(dir: string, ctx: WalkContext, isRoot = true): Promis
     if (!entry.isFile() || (ctx.match && !ctx.match.test(entry.name))) return;
 
     const st = await limit(() => lstat(full)).catch(() => null);
-    if (!st || (ctx.minAgeMs && Date.now() - st.mtimeMs < ctx.minAgeMs)) return;
+    if (!st || (ctx.minAgeMs && ageMs(st) < ctx.minAgeMs)) return;
     await ctx.onFile(full, st.size);
   }));
 

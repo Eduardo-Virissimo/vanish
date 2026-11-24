@@ -109,7 +109,7 @@ function categorySection(c: CategoryState, unopened: Set<string>): HTMLElement {
     return section;
   }
   if (c.blocked) {
-    section.append(el('p', 'dr-cat-state', `${c.blocked}.`));
+    section.append(el('p', 'dr-cat-state', `${c.blocked.reason}.`));
   } else if (!willClean) {
     section.append(el('p', 'dr-cat-state', c.bytes ? 'Desmarcada: não será limpa' : 'Nada para limpar aqui'));
   }

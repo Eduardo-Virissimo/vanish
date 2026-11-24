@@ -135,5 +135,5 @@ arquivo da categoria, registre na auditoria e rode `npm test`. O teste **recusa*
 
 ## Licença
 
-Código sob a licença **ISC** (veja `package.json`). A fonte **Sora**, usada no nome do app, é
+Código sob a licença **ISC** (veja [`LICENSE`](LICENSE)). A fonte **Sora**, usada no nome do app, é
 distribuída sob a SIL Open Font License 1.1 (`src/renderer/fonts/OFL-Sora.txt`).

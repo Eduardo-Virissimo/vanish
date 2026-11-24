@@ -2,6 +2,7 @@
 // Motivos e fontes em docs/SAFETY-AUDIT.md.
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
+import type { Blocked } from '../shared/types';
 import type { Guard } from './types';
 
 const run = promisify(execFile);
@@ -26,10 +27,13 @@ export async function rebootPending(): Promise<boolean> {
   return found.some(Boolean);
 }
 
-/** Devolve o motivo do bloqueio, ou undefined se pode seguir */
-export async function checkGuard(guard: Guard | undefined): Promise<string | undefined> {
+/** Devolve o bloqueio, ou undefined se pode seguir */
+export async function checkGuard(guard: Guard | undefined): Promise<Blocked | undefined> {
   if (guard === 'no-pending-reboot' && (await rebootPending())) {
-    return 'Reinicie o PC antes: há uma atualização esperando para terminar';
+    return {
+      label: 'Reinicie antes',
+      reason: 'Há uma atualização esperando o PC reiniciar para terminar. Reinicie o PC e analise de novo',
+    };
   }
   return undefined;
 }

@@ -36,6 +36,14 @@ o que o app faz para evitar. Feita em 12/11/2026 e ampliada em 13/11/2026, sobre
 ## Proteções que valem para tudo
 
 - Só apaga o **conteúdo** das pastas listadas; nunca a pasta em si (`engine.ts`).
+- **Confere as pastas no PC do usuário, não só nos testes** (`safety.ts`, desde 23/11/2026). As
+  pastas-base vêm de variáveis de ambiente; num PC com `TEMP=C:\` (já visto em guias antigos e
+  programas mal-comportados) o app apagaria tudo o que tivesse mais de 24 h no disco. Agora toda
+  pasta resolvida precisa estar numa área permitida cuja base tem o formato esperado
+  (`...\AppData\Local`, `...\AppData\Roaming`, `X:\Windows`, uma pasta chamada `Temp`/`Tmp` que não
+  seja a raiz de um disco), não pode ser nem conter uma pasta proibida e não pode passar por dados
+  do usuário. Se uma falhar, a categoria inteira fica "Bloqueada" e nada dela é lido ou apagado.
+  A checagem é feita na análise e de novo na limpeza.
 - **Não segue links nem junções** (`fs-walk.ts`): um atalho dentro de um cache nunca leva a
   apagar algo fora dele. Testado com uma junção apontando para uma pasta com um arquivo: o
   arquivo de fora continuou intacto.
@@ -58,6 +66,10 @@ o que o app faz para evitar. Feita em 12/11/2026 e ampliada em 13/11/2026, sobre
 - **Risco:** um instalador em andamento pode estar usando arquivos dali.
   **Proteção:** só apaga arquivos com mais de **24 horas**, e arquivos em uso são pulados.
   Subpastas recentes também não são removidas.
+- **A idade conta a data mais nova entre criação e modificação** (desde 23/11/2026). Quem extrai
+  um zip ou instalador mantém a data de modificação original dos arquivos (ex.: 2023), mas a data
+  de criação é a da extração. Antes só a modificação era olhada, e um instalador extraído minutos
+  antes podia ter arquivos apagados no meio da instalação.
 - **Risco residual (baixo):** um instalador que pediu para terminar algo "na próxima
   reinicialização" pode apontar para um arquivo em Temp com mais de 24 h. Ver ideia no fim.
 

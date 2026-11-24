@@ -1,5 +1,5 @@
 // Estado da tela e consultas sobre ele. As views só leem; quem muda é o controller.
-import type { CategoryId, CategoryInfo, CleanResult, DiskInfo, FolderInfo, InitData, UpdateStatus } from '../shared/types';
+import type { Blocked, CategoryId, CategoryInfo, CleanResult, DiskInfo, FolderInfo, InitData, UpdateStatus } from '../shared/types';
 import type { CleanRecord } from './memory';
 
 export type Phase = 'scanning' | 'idle' | 'confirm' | 'cleaning' | 'done';
@@ -8,8 +8,8 @@ export interface CategoryState extends CategoryInfo {
   /** null = ainda analisando */
   bytes: number | null;
   denied: boolean;
-  /** motivo do bloqueio (ex.: atualização esperando reiniciar); bloqueada não pode ser limpa */
-  blocked?: string;
+  /** bloqueio (ex.: atualização esperando reiniciar); bloqueada não pode ser limpa */
+  blocked?: Blocked;
   selected: boolean;
   /** o usuário mexeu na seleção; não resetar na próxima análise */
   touched: boolean;

@@ -48,7 +48,7 @@ export function mountCategories(s: AppState, handlers: CategoryHandlers) {
 
 function sizeLabel(c: CategoryState): string {
   if (c.bytes === null) return '—';
-  if (c.blocked) return 'Reinicie antes';
+  if (c.blocked) return c.blocked.label;
   if (c.denied) return 'Precisa de admin';
   if (c.bytes === 0) return 'Vazia';
   return formatBytes(c.bytes);
@@ -56,7 +56,7 @@ function sizeLabel(c: CategoryState): string {
 
 /** explicação completa, lida pelo leitor de tela e mostrada no tooltip */
 function reason(c: CategoryState): string {
-  if (c.blocked) return `${c.blocked}. Reinicie o PC e analise de novo.`;
+  if (c.blocked) return `${c.blocked.reason}.`;
   if (c.denied) return 'Para limpar esta categoria, use "Abrir como administrador", embaixo das categorias.';
   return '';
 }

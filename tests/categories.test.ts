@@ -2,42 +2,17 @@
 // que aponte para um lugar perigoso ou que esteja incompleta. Regras em docs/MAINTENANCE.md.
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
-import { homedir } from 'node:os';
-import { join, sep } from 'node:path';
+import { join, parse, sep } from 'node:path';
 import { test } from 'node:test';
 import { categories } from '../src/cleaner/categories';
-import { LOCAL, PROGRAMDATA, ROAMING, TEMP, WINDIR } from '../src/cleaner/paths';
+import {
+  CONTAINERS, SYSTEM_BASES, USER_DATA_NAMES, allowedAreas, forbiddenFolders, inside, same,
+} from '../src/cleaner/safety';
 
-const HOME = homedir();
+// As regras moram em src/cleaner/safety.ts: as mesmas valem aqui e no app, na hora de limpar.
 const lower = (p: string) => p.toLowerCase();
-const inside = (path: string, base: string) => lower(path).startsWith(lower(base) + sep);
-const same = (a: string, b: string) => lower(a) === lower(b);
-
-/** Só se limpa dentro destas áreas */
-const ALLOWED = [
-  { base: LOCAL, exact: false },
-  { base: ROAMING, exact: false },
-  { base: join(PROGRAMDATA, 'Microsoft', 'Windows', 'WER'), exact: false },
-  { base: TEMP, exact: true },
-  { base: join(WINDIR, 'Temp'), exact: true },
-  { base: join(WINDIR, 'SoftwareDistribution', 'Download'), exact: true },
-];
-
-/** Nunca pode ser alvo, nem conter um destes (apagar o pai apagaria eles) */
-const FORBIDDEN = [
-  'C:\\', WINDIR, join(WINDIR, 'System32'), join(WINDIR, 'WinSxS'), join(WINDIR, 'Installer'),
-  join(WINDIR, 'Prefetch'), join(WINDIR, 'SoftwareDistribution'), PROGRAMDATA, HOME,
-  join(HOME, 'AppData'), LOCAL, ROAMING,
-  ...['Documents', 'Desktop', 'Downloads', 'Pictures', 'Music', 'Videos', 'OneDrive'].map((d) => join(HOME, d)),
-];
-
-/** Pastas com dados do usuário: nenhum alvo pode passar por elas nem terminar nelas */
-const USER_DATA_NAMES = [
-  'Cookies', 'Login Data', 'IndexedDB', 'Local Storage', 'Session Storage', 'Service Worker',
-  'History', 'Bookmarks', 'Storage', 'packages', 'Berry', 'store', 'Saved Games',
-];
-/** Pastas que guardam vários perfis/dados: só podem aparecer no meio do caminho, nunca no fim */
-const CONTAINERS = ['User Data', 'Profiles', 'Partitions', 'Packages'];
+const ALLOWED = allowedAreas(SYSTEM_BASES);
+const FORBIDDEN = forbiddenFolders(SYSTEM_BASES);
 
 const targetsOf = (c: (typeof categories)[number]) => c.targets ?? [];
 
@@ -90,6 +65,7 @@ test('toda pasta está dentro de uma área permitida', () => {
 test('nenhuma pasta é proibida nem contém uma pasta proibida', () => {
   for (const c of categories) {
     for (const t of targetsOf(c)) {
+      assert.ok(!same(t.path, parse(t.path).root), `${c.id}: "${t.path}" é a raiz de um disco`);
       for (const f of FORBIDDEN) {
         assert.ok(!same(t.path, f) && !inside(f, t.path), `${c.id}: "${t.path}" toca em "${f}"`);
       }

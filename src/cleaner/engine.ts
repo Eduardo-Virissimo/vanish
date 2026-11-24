@@ -1,8 +1,9 @@
 // Analisar (só lê) e limpar (apaga) uma categoria. Os dois devolvem o detalhe por pasta.
 import { lstat, rmdir, unlink } from 'node:fs/promises';
 import type { CleanResult, FolderInfo, ScanResult } from '../shared/types';
-import { expand, limit, walk, type WalkContext } from './fs-walk';
+import { ageMs, expand, limit, walk, type WalkContext } from './fs-walk';
 import { checkGuard } from './guards';
+import { SYSTEM_BASES, unsafeRoots, type Bases } from './safety';
 import { emptyRecycleBin, scanRecycleBin } from './recycle-bin';
 import type { Category, Target } from './types';
 
@@ -40,7 +41,7 @@ async function removeEmptyDirs(dirs: string[], minAgeMs?: number) {
   dirs.sort((a, b) => b.length - a.length);
   for (const dir of dirs) {
     try {
-      if (minAgeMs && Date.now() - (await lstat(dir)).mtimeMs < minAgeMs) continue;
+      if (minAgeMs && ageMs(await lstat(dir)) < minAgeMs) continue;
       await rmdir(dir);
     } catch { /* não está vazia ou está em uso */ }
   }
@@ -48,12 +49,21 @@ async function removeEmptyDirs(dirs: string[], minAgeMs?: number) {
 
 const sumBytes = (folders: FolderInfo[]) => folders.reduce((sum, f) => sum + f.bytes, 0);
 
-export async function scanCategory(category: Category, onPath: OnPath): Promise<ScanResult> {
+/**
+ * `bases`: pastas-base que valem como lugar seguro (padrão: as do sistema). Os testes passam
+ * pastas falsas; o app usa sempre o padrão.
+ */
+export async function scanCategory(category: Category, onPath: OnPath, bases: Bases = SYSTEM_BASES): Promise<ScanResult> {
   if (category.special === 'recycle') return scanRecycleBin(onPath);
+
+  const roots = await resolveRoots(category.targets);
+  // caminho fora do lugar (ex.: TEMP=C:\): nem lê, para não somar o disco inteiro
+  const unsafe = unsafeRoots(roots.map((r) => r.root), bases);
+  if (unsafe) return { bytes: 0, files: 0, denied: false, blocked: unsafe, folders: [] };
 
   const blocked = await checkGuard(category.guard);
   const folders: FolderInfo[] = [];
-  for (const target of await resolveRoots(category.targets)) {
+  for (const target of roots) {
     const folder: FolderInfo = { path: target.root, bytes: 0, files: 0, denied: false, note: noteFor(target) };
     const ctx: WalkContext = {
       ...target,
@@ -79,7 +89,11 @@ export async function scanCategory(category: Category, onPath: OnPath): Promise<
   };
 }
 
-export async function cleanCategory(category: Category, { onPath, onFreed }: CleanCallbacks): Promise<CleanResult> {
+export async function cleanCategory(
+  category: Category,
+  { onPath, onFreed }: CleanCallbacks,
+  bases: Bases = SYSTEM_BASES,
+): Promise<CleanResult> {
   if (category.special === 'recycle') {
     const result = await emptyRecycleBin(onPath);
     onFreed(result.freed);
@@ -89,8 +103,10 @@ export async function cleanCategory(category: Category, { onPath, onFreed }: Cle
   const result: CleanResult = { freed: 0, removed: 0, skipped: 0, folders: [] };
   // confere de novo na hora de apagar: a situação pode ter mudado desde a análise
   if (await checkGuard(category.guard)) return result;
+  const roots = await resolveRoots(category.targets);
+  if (unsafeRoots(roots.map((r) => r.root), bases)) return result;
 
-  for (const target of await resolveRoots(category.targets)) {
+  for (const target of roots) {
     // o que não deu para apagar continua na pasta
     const left: FolderInfo = { path: target.root, bytes: 0, files: 0, denied: false, note: noteFor(target) };
     const dirs: string[] = [];

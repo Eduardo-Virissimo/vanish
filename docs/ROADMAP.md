@@ -74,6 +74,25 @@ Status em 12/11/2026. A ordem dentro de cada fase é a prioridade sugerida.
 - Detalhes: tamanhos sem quatro dígitos ("1,0 GB"), caminhos completos que quebram só nas barras,
   cores do rodapé e do diálogo em tokens, sem brilho nos pontos da gaveta.
 
+## 🎯 Rumo à v1.0 (revisão de 23/11/2026)
+
+Segurança primeiro, depois bugs, depois produto e mais lugares para limpar.
+
+1. ✅ **Conferir as pastas no PC do usuário** (`src/cleaner/safety.ts`): `TEMP=C:\` ou
+   `LOCALAPPDATA` estranho bloqueiam a categoria em vez de apagar o disco. As regras dos testes e do
+   app agora são as mesmas.
+2. ✅ **Idade mínima pela data mais nova** entre criação e modificação (arquivos extraídos de zip
+   mantêm a data antiga).
+3. **Erro numa categoria não pode virar "Vazia"** (`main/ipc.ts` troca a falha por um resultado vazio).
+4. **Detectar admin sem `net session`** (falha se o serviço "Servidor" estiver desligado).
+5. **Avisar quando o "Abrir como administrador" troca de conta** (usuário padrão + senha de outro
+   admin: o app passaria a limpar os caches e a Lixeira da outra conta).
+6. **Lixeira conta cada item duas vezes** (`$I` + `$R`).
+7. **Fechar no meio da limpeza** pergunta antes; **log em arquivo** e "Copiar diagnóstico".
+8. ✅ `LICENSE` (ISC). Falta: tela "Sobre" (versão, GitHub, procurar atualização), CI rodando testes em todo push.
+9. Tipo de alvo "rodar comando" (item 4 abaixo) e `Code\CachedExtensionVSIXs` (2,1 GB no PC
+   auditado; falta fonte).
+
 ## 🔜 Próximo — v0.5: pronto para usar no dia a dia
 
 1. ✅ **Instalador `.exe`** com electron-builder e **atualização automática** pelo GitHub (feito; ver

@@ -48,7 +48,8 @@ desenvolvimento (`npm start`): como o app só permite uma janela, a cópia nova 
 - Instala só para o usuário atual, em `%LOCALAPPDATA%\Programs\Vanish`, sem pedir administrador.
 - Cria atalho no menu Iniciar e na área de trabalho, e abre o Vanish no fim.
 - Desinstala pelo "Adicionar ou remover programas" do Windows. O histórico de limpezas
-  (`%APPDATA%\Vanish`) fica, para não se perder numa reinstalação.
+  (`%APPDATA%\Vanish`) fica, para não se perder numa reinstalação. Todos os lugares onde o app
+  coloca arquivos estão no [README › Desinstalar](../README.md#desinstalar).
 
 ## Assinatura de código (antivírus, SmartScreen e Smart App Control)
 

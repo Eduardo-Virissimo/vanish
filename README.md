@@ -112,9 +112,31 @@ e abra. Ele instala em segundos, só para o seu usuário (sem pedir administrado
   ligado, ele é bloqueado; sem ele, o Windows mostra "O Windows protegeu o computador": clique em
   **Mais informações → Executar assim mesmo**. Para usar com o Controle Inteligente ligado é preciso
   desligá-lo (Segurança do Windows → Controle de aplicativos e navegador).
-- Para desinstalar: Configurações do Windows → Aplicativos → Vanish.
+- Para desinstalar, veja [Desinstalar](#desinstalar) logo abaixo.
 
 Como publicar uma versão nova: [docs/RELEASE.md](docs/RELEASE.md).
+
+## Desinstalar
+
+1. **Configurações do Windows → Aplicativos → Aplicativos instalados → Vanish → Desinstalar.**
+   Não precisa de administrador. Feche o Vanish antes.
+2. Pronto. O programa e os atalhos saem. Para tirar **tudo**, apague também as duas pastas que
+   ficam de propósito (veja a tabela): cole o caminho na barra do Explorador e apague a pasta.
+
+Onde o Vanish coloca arquivos (tudo dentro do seu usuário, nada em `C:\Program Files` nem em
+`C:\Windows`):
+
+| O quê | Onde | Sai ao desinstalar? |
+|---|---|---|
+| O programa | `%LOCALAPPDATA%\Programs\vanish` | sim |
+| Atalho no menu Iniciar | `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Vanish.lnk` | sim |
+| Atalho na área de trabalho | `Vanish.lnk` na sua área de trabalho | sim |
+| Entrada em "Aplicativos instalados" | registro, em `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Uninstall` | sim |
+| Dados do app: histórico de limpezas, categorias desmarcadas, cache da própria janela e o registro de erros (`logs\vanish.log`) | `%APPDATA%\Vanish` | **não**, de propósito: reinstalar não perde o histórico. Pode apagar à mão |
+| Cópia do instalador baixada pela atualização automática | `%LOCALAPPDATA%\vanish-updater` | pode ficar. Pode apagar à mão |
+
+Se a desinstalação pelo Windows falhar, o desinstalador fica em
+`%LOCALAPPDATA%\Programs\vanish\Uninstall Vanish.exe`.
 
 ## Desenvolver
 

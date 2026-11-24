@@ -34,7 +34,8 @@ Princípios:
 
 ## Cores
 
-Definidas em `src/renderer/styles/tokens.css`.
+Definidas em `src/renderer/styles/tokens.css`. Toda cor com matiz é token; só luz e sombra de
+relevo (branco ou preto translúcido em reflexos, sombras e hover) ficam direto no CSS de cada parte.
 
 | Token | Valor | Uso |
 |---|---|---|
@@ -50,6 +51,9 @@ Definidas em `src/renderer/styles/tokens.css`.
 | `--primary` / `--primary-hover` | `#3A3C44` / `#45474F` | confirmar uma limpeza só de caches no diálogo: o mesmo cinza, um tom acima do "Cancelar" |
 | `--danger` / `--danger-text` | `#CC3A3F` / `#FF9A9D` | apagar o que não volta (branco sobre ele: 4,95:1) |
 | `--spark` | `#FFD9A0` | número liberado no fim da limpeza (cor da faísca) |
+| `--brand-blue` / `--brand-cyan` | `#3D8BFF` / `#68CCFF` | cores do símbolo: gráfico do histórico e LED de "Atualizar" |
+| `--on-danger` | `#FFFFFF` | texto do botão vermelho |
+| `--splash-bg` | `#000000` | fundo da tela de abertura |
 | — | `#000000` | só na tela de abertura |
 | `--surface-panel` / `--surface-modal` | `#1F2023` / `#202125` | gaveta / diálogo |
 
@@ -119,10 +123,11 @@ Números de tamanho usam `font-variant-numeric: tabular-nums` para não "dançar
 | **Controles** | "Analisar de novo" (topo do app) é texto + ícone, sem fundo nem borda. O ☰ fica na barra de título, só ícone, com `-webkit-app-region: no-drag` e `aria-label`. Ambos cinza (`--muted`), ficam claros no hover; o ☰ fica destacado com o menu aberto. |
 | **Botão principal** | só um por tela: "Limpar X GB" no rodapé (`.btn-clean`), em vidro cinza (degradê `--btn-hover` → `--btn`, luz de 1 px em cima, borda fina, sombra curta). Sem ícone; ao apertar, afunda 1 px. Desabilitado fica chapado. Sem pixels nem branco (o usuário não gostou). Ele não apaga: abre o diálogo de confirmação. Ao lado da mensagem do rodapé fica o símbolo do Vanish (`mark.svg`, 26 px). |
 | **Diálogo de confirmação** | O peso acompanha o risco. **Só caches**: "Limpar X GB?", frase tranquila ("os apps recriam o que precisarem"), efeitos colaterais em texto simples cinza, botão cinza um tom acima do "Cancelar" (`.btn.primary`). **Com algo que não volta** (aviso `danger`, ex.: Lixeira): "Apagar X GB?", esse item primeiro, em vermelho com ⚠, "Entendi" obrigatório e botão vermelho. O ⚠ fica só para o perigo. Antes da lista, o bloco "Para liberar tudo, feche antes:" com uma etiqueta por programa (campo `closeFirst`). Título e botões fixos; só a lista rola, com o pé esmaecido enquanto houver mais itens. Foco começa em **Cancelar**; Esc, clique fora e Cancelar fecham sem apagar. |
-| **Categoria** | checkbox de pixel (ao marcar, enche com a cor e o ✓ desenhado em 7 pixels acende um a um) + ícone + nome + tamanho. Em janela estreita (< 900 px) o texto diminui um pouco. Desmarcada: nome e ícone apagados. Vazia, sem permissão ("Precisa de admin") ou bloqueada ("Reinicie antes"): nome e ícone apagados, motivo curto em `--dim` no lugar do tamanho e a explicação completa no tooltip e no `aria-description` (a linha continua focável com `aria-disabled`, para o teclado chegar ao motivo). Categorias arriscadas (Lixeira, Windows Update) começam desmarcadas. Hover destaca o bloco dela na barra e manda uma onda de luz por ele; desmarcada, o bloco dela adormece em cinza. |
+| **Categoria** | checkbox de pixel (ao marcar, enche com a cor e o ✓ desenhado em 7 pixels acende um a um) + ícone + nome + tamanho. Em janela estreita (< 900 px) o texto diminui um pouco. Desmarcada: nome e ícone apagados. Vazia, sem permissão ("Precisa de admin") ou bloqueada ("Reinicie antes", "Bloqueada" ou "Não analisada", conforme o motivo): nome e ícone apagados, motivo curto em `--dim` no lugar do tamanho e a explicação completa no tooltip e no `aria-description` (a linha continua focável com `aria-disabled`, para o teclado chegar ao motivo). Categorias arriscadas (Lixeira, Windows Update) começam desmarcadas. Hover destaca o bloco dela na barra e manda uma onda de luz por ele; desmarcada, o bloco dela adormece em cinza. |
 | **Menu (☰)** | pontos das categorias são LEDs (reflexo em cima, sombra embaixo, halo curto), iguais aos do diálogo. Topo: cabeçalho compacto (símbolo pequeno ao lado do nome), **fixo** na linha do X enquanto o resto rola. Embaixo do título, o resumo do que vai acontecer ("5,2 GB em 57 pastas", só categorias marcadas). Por categoria: ponto colorido, nome e tamanho, num cabeçalho que **gruda** logo abaixo da marca enquanto as pastas dela rolam. Pastas em fonte mono, maiores primeiro: o caminho até a pasta em `--muted` e o **nome da pasta em destaque**; quebra de linha só depois das barras; a regra embaixo. Categoria desmarcada mostra só "Desmarcada: não será limpa" e as pastas ficam recolhidas em "Ver N pastas". A barra de rolagem começa abaixo do X. |
 | **Topo** | número grande = quanto dá para liberar ("para liberar"); depois de limpar, o total liberado ("liberados"); "Tudo limpo" quando não há nada; "—" + o problema quando algo falhou. Linha de baixo: parado, o disco usado e "última limpeza há N dias" em `--muted`; trabalhando, o verbo ("Analisando", "Limpando") + caminho atual em mono, cortado no meio. Só o rodapé (`#msg`) é `aria-live`. |
 | **Precisa de administrador** | linha discreta embaixo das categorias (`--muted`, ícone de escudo em traço): "Windows Update precisa de administrador." + botão com cara de link "Abrir como administrador" (`.link-btn`, sublinhado fino). Só aparece se alguma categoria tiver `denied` e o app não estiver elevado. |
+| **Aberto em outra conta** | mesma linha discreta, com ícone de pessoa no tom `--danger-text` e texto em `--soft`: "O Vanish foi aberto como administrador na conta \"X\". O que ele limpa agora (...) é dessa conta, não da sua." Só aparece quando o UAC reabriu o app na conta de outro administrador (`otherAccount`). |
 | **Histórico (gaveta)** | logo abaixo da marca: "Liberado com o Vanish", total em display 28 px, "liberados em N limpezas" e um gráfico de 8 semanas: cada semana é uma coluna de 10 pixels largos, acesos de baixo para cima no degradê do símbolo (azul `#3D8BFF` → ciano `#68CCFF`) com acabamento LED; apagados como o vidro vazio da barra. A semana atual tem um traço embaixo. Tooltip por coluna com a data e o total. |
 | **Atalhos** | Ctrl+R ou F5: analisar de novo. Ctrl+Enter: abre a confirmação (nunca confirma; com o diálogo aberto os atalhos não funcionam). Esc fecha diálogo e gaveta. Os atalhos aparecem no tooltip dos botões. |
 

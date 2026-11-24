@@ -67,6 +67,8 @@ Este app **apaga arquivos**. Um erro aqui destrói dados do usuário.
 - Um assunto por arquivo; arquivos com mais de ~150 linhas devem ser divididos.
 - Estado da tela muda só no `controller.ts`; as views só leem o estado e desenham.
 - CSS: um arquivo por parte da tela em `styles/`, cores e medidas só via tokens (`tokens.css`).
+  Exceção: luz e sombra de relevo (reflexo, sombra, hover) em branco ou preto translúcido,
+  `rgba(255,255,255,a)`/`rgba(0,0,0,a)`, podem ficar no arquivo. Qualquer matiz (azul, vermelho...) é token.
 - A CSP bloqueia `style="..."` no HTML gerado: use `el.style.setProperty(...)` no TypeScript.
 
 ## Convenções

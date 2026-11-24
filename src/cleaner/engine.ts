@@ -3,6 +3,7 @@ import { lstat, rmdir, unlink } from 'node:fs/promises';
 import type { CleanResult, FolderInfo, ScanResult } from '../shared/types';
 import { ageMs, expand, limit, walk, type WalkContext } from './fs-walk';
 import { checkGuard } from './guards';
+import { pendingRenames } from './pending-renames';
 import { SYSTEM_BASES, unsafeRoots, type Bases } from './safety';
 import { emptyRecycleBin, scanRecycleBin } from './recycle-bin';
 import type { Category, Target } from './types';
@@ -62,11 +63,14 @@ export async function scanCategory(category: Category, onPath: OnPath, bases: Ba
   if (unsafe) return { bytes: 0, files: 0, denied: false, blocked: unsafe, folders: [] };
 
   const blocked = await checkGuard(category.guard);
+  // arquivos que o Windows vai trocar no próximo reinício: nem conta (nem apaga, na limpeza)
+  const skip = await pendingRenames();
   const folders: FolderInfo[] = [];
   for (const target of roots) {
     const folder: FolderInfo = { path: target.root, bytes: 0, files: 0, denied: false, note: noteFor(target) };
     const ctx: WalkContext = {
       ...target,
+      skip,
       onFile: (file, size) => {
         folder.bytes += size;
         folder.files++;
@@ -105,6 +109,7 @@ export async function cleanCategory(
   if (await checkGuard(category.guard)) return result;
   const roots = await resolveRoots(category.targets);
   if (unsafeRoots(roots.map((r) => r.root), bases)) return result;
+  const skip = await pendingRenames();
 
   for (const target of roots) {
     // o que não deu para apagar continua na pasta
@@ -112,6 +117,7 @@ export async function cleanCategory(
     const dirs: string[] = [];
     const ctx: WalkContext = {
       ...target,
+      skip,
       dirs,
       onFile: async (file, size) => {
         onPath(file);

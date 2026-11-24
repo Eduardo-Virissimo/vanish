@@ -81,7 +81,9 @@ Segurança primeiro, depois bugs, depois produto e mais lugares para limpar.
 **Versões publicadas nesta fase:** 0.5.1 saiu com o instalador dividido em duas releases com a
 mesma tag (o link de download dava 404) e foi retirada. **0.5.2** tem o mesmo conteúdo, publicada
 pelo workflow corrigido (release criada antes do envio dos arquivos) e pelo fluxo `dev` → `main`
-([GIT.md](GIT.md)).
+([GIT.md](GIT.md)). **0.6.0**: a revisão geral (item 10: Lixeira só em discos locais, arquivos
+agendados para o reinício protegidos, travas do Electron, aviso de conta trocada pelo UAC, pergunta
+ao fechar no meio da limpeza, registro de erros) e a seção "Desinstalar" do README.
 
 1. ✅ **Conferir as pastas no PC do usuário** (`src/cleaner/safety.ts`): `TEMP=C:\` ou
    `LOCALAPPDATA` estranho bloqueiam a categoria em vez de apagar o disco. As regras dos testes e do
@@ -92,14 +94,21 @@ pelo workflow corrigido (release criada antes do envio dos arquivos) e pelo flux
    limpeza com erro numa categoria mostra o nome dela e leva para "Analisar de novo".
 4. ✅ **Admin detectado pelo nível de integridade** (`whoami /groups`, `main/integrity.ts`), não mais
    por `net session`.
-5. **Avisar quando o "Abrir como administrador" troca de conta** (usuário padrão + senha de outro
-   admin: o app passaria a limpar os caches e a Lixeira da outra conta).
+5. ✅ **Aviso quando o "Abrir como administrador" troca de conta**: a cópia elevada recebe o SID de
+   quem pediu e, se for outra conta, avisa de quem são os caches e a Lixeira que serão limpos.
 6. ✅ **Lixeira conta cada item uma vez** (os arquivos `$I` de informação não entram na contagem).
-7. **Fechar no meio da limpeza** pergunta antes; **log em arquivo** e "Copiar diagnóstico".
+7. ✅ **Fechar no meio da limpeza** pergunta antes; ✅ **log em arquivo**
+   (`%APPDATA%\Vanish\logs\vanish.log`). Falta: botão "Copiar diagnóstico" na gaveta.
 8. ✅ `LICENSE` (ISC) e CI em todo push (`.github/workflows/ci.yml`). Falta: tela "Sobre" (versão,
    GitHub, procurar atualização).
 9. Tipo de alvo "rodar comando" (item 4 abaixo) e `Code\CachedExtensionVSIXs` (2,1 GB no PC
    auditado; falta fonte).
+10. ✅ **Revisão geral de todos os arquivos** (23/11/2026, branch `fix/revisao-geral`): Lixeira só
+    em discos locais (análise e esvaziamento não travam mais em unidade de rede); travas do Electron
+    (origem do IPC, permissões, `<webview>`); arquivos de `PendingFileRenameOperations` nunca
+    apagados; log de erros; aviso de conta trocada pelo UAC; cores da marca em tokens;
+    `.gitattributes`. Falta: as *fuses* do Electron (desligar `RunAsNode` etc.) no
+    electron-builder, que só dá para testar no instalador gerado pelo GitHub.
 
 ## 🔜 Próximo — v0.5: pronto para usar no dia a dia
 
@@ -107,8 +116,8 @@ pelo workflow corrigido (release criada antes do envio dos arquivos) e pelo flux
    [RELEASE.md](RELEASE.md)). Sem assinatura de código, por decisão (16/11/2026).
 2. ✅ **"Abrir como administrador"** feito (v0.5). Falta:
    Com admin, parar o serviço `wuauserv` antes de limpar o Windows Update e religar depois.
-3. **Fechar os riscos restantes da auditoria**: bloquear Temporários também quando houver
-   reinício pendente (ou pular arquivos em `PendingFileRenameOperations`).
+3. ✅ **Fechar os riscos restantes da auditoria**: arquivos em `PendingFileRenameOperations` são
+   pulados em todas as categorias (`cleaner/pending-renames.ts`).
 4. **Limpar com o comando do próprio programa** (`uv cache clean`, `pnpm store prune`,
    `Delete-DeliveryOptimizationCache`): um tipo de alvo que roda um comando em vez de apagar.
 5. **Teste de interface com cliques reais** (Playwright para Electron): abrir o app, clicar no ☰,

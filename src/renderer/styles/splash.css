@@ -10,7 +10,7 @@
   place-content: center;
   justify-items: center;
   gap: 18px;
-  background: #000;
+  background: var(--splash-bg);
   cursor: default;
   transition: opacity 480ms ease;
 }

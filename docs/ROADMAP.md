@@ -101,6 +101,12 @@ pelo workflow corrigido (release criada antes do envio dos arquivos) e pelo flux
    GitHub, procurar atualização).
 9. Tipo de alvo "rodar comando" (item 4 abaixo) e `Code\CachedExtensionVSIXs` (2,1 GB no PC
    auditado; falta fonte).
+10. ✅ **Revisão geral de todos os arquivos** (23/11/2026, branch `fix/revisao-geral`): Lixeira só
+    em discos locais (análise e esvaziamento não travam mais em unidade de rede); travas do Electron
+    (origem do IPC, permissões, `<webview>`); arquivos de `PendingFileRenameOperations` nunca
+    apagados; log de erros; aviso de conta trocada pelo UAC; cores da marca em tokens;
+    `.gitattributes`. Falta: as *fuses* do Electron (desligar `RunAsNode` etc.) no
+    electron-builder, que só dá para testar no instalador gerado pelo GitHub.
 
 ## 🔜 Próximo — v0.5: pronto para usar no dia a dia
 
